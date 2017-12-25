@@ -1,7 +1,9 @@
 package Taluvo.Game;
 
+import Taluvo.GUI.Clickables.Buttons.ButtonGroup;
 import Taluvo.GUI.Clickables.Buttons.RadialButton;
 import Taluvo.GUI.Clickables.Buttons.RadialButtonGroup;
+import Taluvo.GUI.Displayables.CompositeDisplayable;
 import Taluvo.Game.Displayables.*;
 import Taluvo.Game.GameModel.*;
 import Taluvo.Util.ImageFactory;
@@ -50,23 +52,36 @@ public class GameUberstate extends Uberstate
         tabulator.analyze(game);
 
         // Deck GUI elements:
-        super.addOverlay(new DeckDisplayable(new Point(1136, 16), game.getDeck()));
+        super.addRightOverlay(new DeckDisplayable(new Point(1136, 16), game.getDeck()));
 
-        emplaceButton(new Button(new Point(1136, 144),
+
+        Button rotLeft = new Button(new Point(0, -16),
                 ImageFactory.makeBorderedRect(64, 64, Color.WHITE, Color.BLACK),
                 ImageFactory.makeBorderedRect(64, 64, Color.RED, Color.BLACK),
-                () -> game.getDeck().rotLeft()));
+                () -> game.getDeck().rotLeft());
 
-        emplaceButton(new Button(new Point(1200, 144),
+        //emplaceButton(rotLeft);
+        //addToOverlayManager(rotLeft);
+
+
+        Button rotRight = new Button(new Point(64, -16),
                 ImageFactory.makeBorderedRect(64, 64, Color.WHITE, Color.BLACK),
                 ImageFactory.makeBorderedRect(64, 64, Color.RED, Color.BLACK),
-                () -> game.getDeck().rotRight()));
+                () -> game.getDeck().rotRight());
+
+        ButtonGroup rots = new ButtonGroup(new Point(1136, 144), rotLeft, rotRight);
+
+        addStaticClickable(rots);
+        addRightOverlay(rots);
+
+        //emplaceButton(rotRight);
+        //addToOverlayManager(rotRight);
 
         // Hex Detail GUI element:
-        super.addOverlay(new HexDetailDisplayable(new Point(1120, 224), this));
+        super.addRightOverlay(new HexDetailDisplayable(new Point(1120, 224), this));
 
         // Turn Status GUI element:
-        super.addOverlay(new TurnStatusDisplayable(new Point(1120, 376), this));
+        super.addRightOverlay(new TurnStatusDisplayable(new Point(1120, 376), this));
 
         // Building selection radial buttons:
         // Todo: get buttons from a factory or something to tidy these constructors up
@@ -113,30 +128,61 @@ public class GameUberstate extends Uberstate
                 () -> {activeTerrain = Hex.Terrain.ROCKY; activeBuildAction = new ExpandSettlement();});
 
         RadialButtonGroup buildingSelectGroup = new RadialButtonGroup(new Point(1088, 480),
-                new Dimension(192, 32),
                 villagerButton, templeButton, towerButton, grassButton, jungleButton, lakeButton, rockyButton);
 
-        addClickable(buildingSelectGroup);
-        addOverlay(buildingSelectGroup);
+        addStaticClickable(buildingSelectGroup);
+        addRightOverlay(buildingSelectGroup);
 
         // Player GUI elements:
-        super.addOverlay(new PlayerPiecesDisplayable(new Point(384, 16), Player.ONE));
-        super.addOverlay(new PlayerPiecesDisplayable(new Point(672, 16), Player.TWO));
+        super.addCenterOverlay(new CompositeDisplayable(new Point(384, 16),
+                new PlayerPiecesDisplayable(new Point(0, 0), Player.ONE),
+                new PlayerPiecesDisplayable(new Point(288, 0), Player.TWO)));
 
-        // Settlements GUI element:
-
-        super.addOverlay(new SettlementsDisplayable(new Point(16, 16), game.getBoard()));
+        //super.addRightOverlay(new PlayerPiecesDisplayable(new Point(384, 16), Player.ONE));
+        //super.addRightOverlay(new PlayerPiecesDisplayable(new Point(672, 16), Player.TWO));
 
         // AI action button:
 
-        Button aiButton = new Button(new Point(16, 680),
+        Button aiButton = new Button(new Point(0, 0),
                 ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.BLACK, Color.BLACK, "AI MOVE", new Point(6, 18)),
                 ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.BLACK, Color.BLACK, "AI MOVE", new Point(6, 18)),
                 () -> {tabulator.analyze(game); tabulator.playNextTurn(game);});
 
-        emplaceButton(aiButton);
+        //emplaceButton(aiButton);
 
-                // Initialize starting HexButtons:
+        Button resolveButton = new Button(new Point(80, 0),
+                ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.BLACK, Color.BLACK, "RESOLVE", new Point(6, 18)),
+                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.BLACK, Color.BLACK, "RESOLVE", new Point(6, 18)),
+                () ->
+                {
+                    long gameStart = System.nanoTime();
+                    int turnCount = 0;
+                    while(game.getEndCondition() == Game.EndCondition.ACTIVE)
+                    {
+                        //long startTime = System.nanoTime();
+                        tabulator.analyze(game);
+                        tabulator.playNextTurn(game);
+                        ++turnCount;
+                        //long endTime = System.nanoTime();
+                        //System.out.println("Time elapsed during turn: " + ((double) (endTime - startTime)) / 1000000 + " ms");
+                    }
+                    long gameTotal = System.nanoTime() - gameStart;
+                    System.out.println("Total time elapsed: " + ((double) gameTotal) / 1000000 + " ms, " + turnCount + " turns taken, avg turn time: " + ((double) gameTotal) / turnCount / 1000000 + " ms");
+                });
+
+        //emplaceButton(resolveButton);
+
+        ButtonGroup aiGroup = new ButtonGroup(new Point(16, 680), aiButton, resolveButton);
+
+        addStaticClickable(aiGroup);
+        addLeftOverlay(aiGroup);
+
+        // Settlements GUI element:
+
+        super.addLeftOverlay(new SettlementsDisplayable(new Point(16, 16), game.getBoard(), overlayManager));
+
+
+        // Initialize starting HexButtons:
         for(Hex hex : game.getNewHexes())
         {
             emplaceHexButton(new HexButton(hex, () -> {executeGameAction(hex.getOrigin());}));
@@ -174,11 +220,11 @@ public class GameUberstate extends Uberstate
         buttonMap.put(button.getOrigin(), button);
     }
 
-    private void emplaceButton(Button button)
-    {
-        super.addClickable(button);
-        super.addOverlay(button);
-    }
+    //private void emplaceButton(Button button)
+    //{
+    //    super.addStaticClickable(button);
+    //    super.addOverlay(button, true);
+    //}
 
     public Hex.Building getActiveBuilding() { return activeBuilding; }
     public TurnPhase getActivePhase() { return activePhase; }

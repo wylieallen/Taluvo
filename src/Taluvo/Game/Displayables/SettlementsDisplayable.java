@@ -1,5 +1,6 @@
 package Taluvo.Game.Displayables;
 
+import Taluvo.GUI.Uberstate;
 import Taluvo.Game.GameModel.Board;
 import Taluvo.Game.GameModel.Settlement;
 import Taluvo.Util.ImageFactory;
@@ -8,17 +9,30 @@ import java.awt.*;
 
 public class SettlementsDisplayable extends HudElement
 {
-    private static Dimension size = new Dimension(128, 512);
+    private static Dimension size = new Dimension(128, 21);
 
     private Board board;
 
-    public SettlementsDisplayable(Point origin, Board board)
+    private Uberstate.OverlayManager overlayManager;
+
+    public SettlementsDisplayable(Point origin, Board board, Uberstate.OverlayManager overlayManager)
     {
-        super(origin, ImageFactory.makeBorderedRect(size.width, size.height, Color.WHITE, Color.BLACK));
+        super(origin, ImageFactory.makeBorderedRect(size.width, 21, Color.WHITE, Color.BLACK));
         this.board = board;
+        this.overlayManager = overlayManager;
     }
 
     public Dimension getSize() {return size;}
+
+    public void update()
+    {
+        int height = 21 + (16 * board.getSettlements().size());
+        if(size.height != height)
+        {
+            size = new Dimension(size.width, height);
+            overlayManager.resetLeftOverlays();
+        }
+    }
 
     public void drawContents(Graphics2D g2d, Point drawPt)
     {

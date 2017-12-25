@@ -17,7 +17,7 @@ public class Hex
     private int level;
     private Terrain terrain;
     private int tileID;
-    private int settlementID;
+    private Settlement settlement;
     private Building building;
     private Player owner;
 
@@ -27,7 +27,7 @@ public class Hex
         this.level = level;
         this.terrain = terrain;
         this.tileID = tileID;
-        this.settlementID = -1;
+        this.settlement = Settlement.getNullSettlement();
         this.building = Building.NONE;
         this.owner = Player.NONE;
     }
@@ -45,7 +45,8 @@ public class Hex
         return terrain;
     }
     public int getTileID() { return tileID; }
-    public int getSettlementID() { return settlementID; }
+    public int getSettlementID() { return settlement.getSettlementID(); }
+    public Settlement getSettlement() {return settlement;}
     public Building getBuilding() { return building; }
     public Player getOwner() { return owner; }
 
@@ -60,7 +61,9 @@ public class Hex
         this.owner = owner;
     }
 
-    public void setSettlementID(int settlementID) { this.settlementID = settlementID; }
+    //public void setSettlementID(int settlementID) { this.settlementID = settlementID; }
+
+    public void setSettlement(Settlement settlement) { this.settlement = settlement; }
 
     public void translate(int dx, int dy)
     {

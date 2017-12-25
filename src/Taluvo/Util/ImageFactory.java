@@ -18,7 +18,7 @@ public class ImageFactory
     private static BufferedImage volcanoHex = makeHex(41, 41, Color.RED, Color.BLACK);
     private static BufferedImage hoverVolcanoHex = makeHex(41, 41, Color.PINK, Color.BLACK);
 
-    private static BufferedImage rockyHex = makeHex(41, 41, Color.GRAY, Color.BLACK);
+    private static BufferedImage rockyHex = makeHex(41, 41, Color.LIGHT_GRAY, Color.BLACK);
     private static BufferedImage hoverRockyHex = makeHex(41, 41, Color.PINK, Color.BLACK);
 
     private static BufferedImage lakeHex = makeHex(41, 41, Color.CYAN, Color.BLACK);
@@ -123,6 +123,7 @@ public class ImageFactory
     {
         BufferedImage image = new BufferedImage(21, 21, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(baseColor);
         g2d.fillOval(0, 0, 20, 20);
         g2d.setColor(Color.GRAY);
@@ -135,6 +136,7 @@ public class ImageFactory
     {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(color);
         g2d.fillRect(0, 0, width, height);
         return image;
@@ -144,6 +146,7 @@ public class ImageFactory
     {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(bodyColor);
         g2d.fillRect(0, 0, width, height);
         g2d.setColor(borderColor);
@@ -155,6 +158,7 @@ public class ImageFactory
     {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(bodyColor);
         g2d.fillRect(0, 0, width, height);
         g2d.setColor(borderColor);
@@ -168,6 +172,7 @@ public class ImageFactory
     {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(bodyColor);
         g2d.fill(hexagon);
         g2d.setColor(borderColor);

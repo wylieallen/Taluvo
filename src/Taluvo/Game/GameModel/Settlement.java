@@ -18,7 +18,9 @@ public class Settlement
         hexes = new HashSet<>();
         hexes.add(initialHex);
 
-        initialHex.setSettlementID(this.settlementID = settlementID);
+        this.settlementID = settlementID;
+
+        initialHex.setSettlement(this);
 
         owner = initialHex.getOwner();
 
@@ -49,7 +51,7 @@ public class Settlement
                 {
                     if(neighbor.getOwner() == this.owner && neighbor.getSettlementID() != settlementID)
                     {
-                        neighbor.setSettlementID(settlementID);
+                        neighbor.setSettlement(this);
                         newNewHexes.add(neighbor);
                         hexes.add(neighbor);
                         if(neighbor.getBuilding() == Hex.Building.TOWER) hasTower = true;
@@ -63,7 +65,9 @@ public class Settlement
 
     }
 
-    public static Settlement getNullSettlement() { return new Settlement(Hex.getNullHex(), -1); }
+    private static final Settlement nullSettlement = new Settlement(Hex.getNullHex(), -1);
+
+    public static Settlement getNullSettlement() { return nullSettlement; }
 
     public static class Expansion
     {

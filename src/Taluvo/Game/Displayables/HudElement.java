@@ -19,6 +19,7 @@ public abstract class HudElement implements Displayable
 
     public Point getOrigin() { return origin;}
 
+
     public void drawAt(Graphics2D g2d, Point drawPt)
     {
         g2d.drawImage(background, drawPt.x, drawPt.y, null);

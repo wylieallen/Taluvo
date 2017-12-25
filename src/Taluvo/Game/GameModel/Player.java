@@ -17,6 +17,13 @@ public enum Player
         this.color2 = color2;
     }
 
+    public void reset()
+    {
+        villagers = 20;
+        temples = 3;
+        towers = 2;
+    }
+
     public final Color color1;
     public final Color color2;
 

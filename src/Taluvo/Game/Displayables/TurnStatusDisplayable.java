@@ -26,6 +26,6 @@ public class TurnStatusDisplayable extends HudElement
         g2d.drawString("Player: " + gameUberstate.getActivePlayer(), drawPt.x + 4, drawPt.y + 36);
         g2d.drawString("Building: " + gameUberstate.getActiveBuilding(), drawPt.x + 4, drawPt.y + 56);
         g2d.drawString("Terrain: " + gameUberstate.getActiveTerrain(), drawPt.x + 4, drawPt.y + 76);
-        g2d.drawString("GameResult: " + gameUberstate.getEndCondition(), drawPt.x + 4, drawPt.y + 96);
+        g2d.drawString("State: " + gameUberstate.getEndCondition(), drawPt.x + 4, drawPt.y + 96);
     }
 }

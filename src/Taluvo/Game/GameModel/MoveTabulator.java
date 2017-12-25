@@ -25,13 +25,15 @@ public class MoveTabulator
     private Set<Game.BuildingPlacementAction> villagerPlacementsThatEnableTowers;
 
     private Set<Game.SettlementExpansionAction> efficientExpansions;
+    private Game.SettlementExpansionAction maxExpansion;
+    private int maxCost;
 
     public void analyze(Game game)
     {
         updateMoveset(game);
         updateTilePlacements(game);
         updateBuildingPlacements(game);
-        //updateSettlementExpansions(game);
+        updateSettlementExpansions(game);
     }
 
     private void updateMoveset(Game game) { allHexes = new HashSet<>(game.getHexes()); }
@@ -118,7 +120,14 @@ public class MoveTabulator
                     {
                         case VILLAGE:
                             legalVillagePlacements.add(action);
-                            // todo: ... villagerPlacementsThatExpand.add etc
+                            if(hexIsTemplelessSettlementAdjacent(action.getTarget(), game) && !hexIsTempledSettlementAdjacent(action.getTarget(), game))
+                            {
+                                villagerPlacementsThatExpand.add(action);
+                            }
+                            if(hexEnablesTowerPlacement(action.getTarget(), game))
+                            {
+                                villagerPlacementsThatEnableTowers.add(action);
+                            }
                             break;
 
                         case TOWER:
@@ -128,10 +137,90 @@ public class MoveTabulator
                         case TEMPLE:
                             legalTemplePlacements.add(action);
                             break;
+
+                        default:
+                            System.out.println("Undefined building type " + action.getBuilding());
+                            break;
                     }
                 }
             }
         }
+    }
+
+    public void updateSettlementExpansions(Game game)
+    {
+        legalSettlementExpansions = new HashSet<>();
+        efficientExpansions = new HashSet<>();
+
+        maxCost = 0;
+        maxExpansion = null;
+
+        for(Settlement settlement : game.getBoard().getSettlements())
+        {
+            for(Hex.Terrain terrain : Hex.Terrain.values())
+            {
+                if(terrain.buildable && settlement.getOwner() == game.getActivePlayer())
+                {
+                    Settlement.Expansion expansion = game.getBoard().getExpansion(settlement, terrain);
+                    if(game.settlementExpansionIsLegal(expansion))
+                    {
+                        Game.SettlementExpansionAction action = game.getSettlementExpansionAction(expansion);
+                        legalSettlementExpansions.add(action);
+
+                        int cost = expansion.getCost();
+
+                        if(cost > maxCost)
+                        {
+                            maxExpansion = action;
+                        }
+
+                        if(cost > 1 && ((float) expansion.getHexes().size()) / cost >= 1 && !settlement.hasTemple())
+                        {
+                            efficientExpansions.add(action);
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean hexIsTemplelessSettlementAdjacent(Hex target, Game game)
+    {
+        for(Hex neighbor : game.getBoard().getNeighbors(target.getOrigin()))
+        {
+            Settlement settlement = neighbor.getSettlement();
+            if(!settlement.hasTemple() && settlement.getOwner() == game.getActivePlayer())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hexIsTempledSettlementAdjacent(Hex target, Game game)
+    {
+        for(Hex neighbor : game.getBoard().getNeighbors(target.getOrigin()))
+        {
+            Settlement settlement = neighbor.getSettlement();
+            if(settlement.hasTemple() && settlement.getOwner() == game.getActivePlayer())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hexEnablesTowerPlacement(Hex target, Game game)
+    {
+        for(Hex neighbor : game.getBoard().getNeighbors(target.getOrigin()))
+        {
+            if(neighbor.buildable() && neighbor.getLevel() >= 3)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void playNextTurn(Game game)
@@ -173,23 +262,58 @@ public class MoveTabulator
     {
         if(!legalTowerPlacements.isEmpty())
         {
+            //System.out.println("placing tower");
             for(Game.Action action : legalTowerPlacements) { return action; }
         }
 
         if(!legalTemplePlacements.isEmpty())
         {
+            //System.out.println("placing temple");
             for(Game.Action action : legalTemplePlacements) { return action; }
+        }
+
+        if(!villagerPlacementsThatEnableTowers.isEmpty())
+        {
+            //System.out.println("placing village to enable tower");
+            for(Game.Action action : villagerPlacementsThatEnableTowers) { return action; }
+        }
+
+        if(maxExpansion != null && (game.getActivePlayer().getTemples() == 0 || game.getActivePlayer().getTowers() == 0))
+        {
+            //System.out.println("performing max cost expansion to exhaust villagers");
+            return maxExpansion;
+        }
+
+        if(!efficientExpansions.isEmpty())
+        {
+            //System.out.println("performing an efficient expansion");
+            for(Game.Action action : efficientExpansions) { return action; }
+        }
+
+        if(!villagerPlacementsThatExpand.isEmpty())
+        {
+            //System.out.println("placing tower");
+            for(Game.Action action : villagerPlacementsThatExpand) { return action; }
         }
 
         if(!legalVillagePlacements.isEmpty())
         {
+            //System.out.println("placing village");
             for(Game.Action action : legalVillagePlacements) { return action; }
         }
 
-        else if(!legalBuildingPlacements.isEmpty())
+        //if(!legalBuildingPlacements.isEmpty())
+        //{
+        //    for(Game.Action action : legalBuildingPlacements) { return action; }
+        //}
+
+        if(!legalSettlementExpansions.isEmpty())
         {
-            for(Game.Action action : legalBuildingPlacements) { return action; }
+            //System.out.println("expanding settlement as a last resort");
+            for(Game.Action action : legalSettlementExpansions) { return action; }
         }
+
+        //System.out.println("No legal build actions found, " + game.getActivePlayer() + " forfeiting game");
 
         return game.getDeclareForfeitAction();
     }

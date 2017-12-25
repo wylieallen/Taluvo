@@ -34,5 +34,8 @@ public class DeckDisplayable extends HudElement
         g2d.drawImage(ImageFactory.getBaseHex(Hex.Terrain.VOLCANO), centerHexOrigin.x + drawPt.x, centerHexOrigin.y + drawPt.y, null);
         g2d.drawImage(hexImageA, centerHexOrigin.x + pointA.x + drawPt.x, centerHexOrigin.y + pointA.y + drawPt.y, null);
         g2d.drawImage(hexImageB, centerHexOrigin.x + pointB.x + drawPt.x, centerHexOrigin.y + pointB.y + drawPt.y, null);
+
+        g2d.setColor(Color.BLACK);
+        g2d.drawString("#" + deck.peek().getTileID(), drawPt.x + 4, drawPt.y + 124);
     }
 }

@@ -1,17 +1,13 @@
 package Taluvo.Game.GameModel;
 
-import Taluvo.Game.GameUberstate;
-
 import java.awt.*;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 public class Game
 {
     private Board board;
     private Deck deck;
-
     private Rules rules;
 
     private EndCondition endCondition;
@@ -156,7 +152,6 @@ public class Game
         }
 
         public Hex getTarget() {return target;}
-        public Tile.Orientation getOrientation() {return tile.getOrientation();}
         public Tile getTile() {return tile;}
     }
 
@@ -351,6 +346,7 @@ public class Game
 
             return expansion.getOwner() == activePlayer
                     && expansion.getCost() <= activePlayer.getBuildingCount(Hex.Building.VILLAGE)
+                    && expansion.getCost() > 0
                     && expansion.getTerrain().buildable;
         }
     }

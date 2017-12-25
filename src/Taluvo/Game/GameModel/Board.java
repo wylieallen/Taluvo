@@ -31,7 +31,7 @@ public class Board
 
         for(Hex hex : hexes)
         {
-            hex.setSettlementID(-1);
+            hex.setSettlement(Settlement.getNullSettlement());
         }
 
         for(Hex hex : hexes)
