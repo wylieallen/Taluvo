@@ -25,14 +25,9 @@ public class Game
 
         endCondition = EndCondition.ACTIVE;
 
-        activePlayer = player1 = Player.ONE;
-        player2 = Player.TWO;
+        activePlayer = player1 = new Player("One", Color.BLACK, Color.WHITE);
+        player2 = new Player("Two", Color.WHITE, Color.BLACK);
     }
-
-    public Deck getDeck() {return deck;}
-    public Player getActivePlayer() {return activePlayer;}
-
-    public List<Hex> getNewHexes() { return board.getNewHexes(); }
 
     public void placeTile(Point point, Tile tile)
     {
@@ -80,6 +75,20 @@ public class Game
     public Board getBoard() {
         return board;
     }
+    public List<Hex> getNewHexes() { return board.getNewHexes(); }
+    public Collection<Hex> getHexes()
+    {
+        return board.getHexes();
+    }
+
+    public Deck getDeck() {return deck;}
+
+    public Player getActivePlayer() {return activePlayer;}
+    public Player getPlayer1() {return player1;}
+    public Player getPlayer2() {return player2;}
+
+    public EndCondition getEndCondition() { return endCondition; }
+
 
     public Settlement.Expansion getSettlementExpansion(Point point, Hex.Terrain terrain)
     {
@@ -102,13 +111,7 @@ public class Game
         endTurn();
     }
 
-    public EndCondition getEndCondition() { return endCondition; }
-
-    public Collection<Hex> getHexes()
-    {
-        return board.getHexes();
-    }
-
+    // Action vending methods:
     public TilePlacementAction getTilePlacementAction(Hex target, Tile tile)
     {
         return new TilePlacementAction(target, tile);
@@ -129,6 +132,7 @@ public class Game
         return new DeclareForfeitAction();
     }
 
+    // Actions:
     public interface Action { void execute();}
 
     public class TilePlacementAction implements Action
@@ -197,19 +201,24 @@ public class Game
 
             // Initialize data:
 
-            Point offsetA = Hex.neighborOffsets[tile.getOrientation().ordinal()];
-            Point offsetB = Hex.neighborOffsets[tile.getOrientationPlus(1).ordinal()];
+            Point offsetA = Hex.neighborOffsets[tile.getIndexA()];
+            Point offsetB = Hex.neighborOffsets[tile.getIndexB()];
 
             Point originA = new Point(point.x + offsetA.x, point.y + offsetA.y);
             Point originB = new Point(point.x + offsetB.x, point.y + offsetB.y);
+
+            //System.out.println("Tile pts: " + point + ", " + originA + ", " + originB);
 
             Hex targetA = board.getHex(originA);
             Hex targetB = board.getHex(originB);
             Hex targetV = board.getHex(point);
 
+            //System.out.println("Actual hex origins: " + targetV.getOrigin() + ", " + targetA.getOrigin() + ", " + targetB.getOrigin());
+
             // Test for illegality:
 
-            return !targetHexTerrainNotVolcanoOrEmpty(targetV)
+            return  endCondition == EndCondition.ACTIVE
+                    && !targetHexTerrainNotVolcanoOrEmpty(targetV)
                     && !targetNonEmptyHexesShareTileID(targetA, targetB, targetV)
                     && (tile.getTileID() <= 0 || !targetHexesHaveOnlyEmptyNeighbors(targetA, targetB, targetV))
                     && !targetHexHasPermanentBuildings(targetA, targetB)
@@ -230,16 +239,27 @@ public class Game
 
         private boolean targetHexesHaveOnlyEmptyNeighbors(Hex... hexes)
         {
+            String hexpts = "";
+
+            for(Hex hex : hexes)
+            {
+                hexpts += hex.getOrigin() + ", ";
+            }
+
+           // System.out.println("Checking hexes " + hexpts);
+
             for(Hex hex : hexes)
             {
                 for(Hex neighbor : board.getNeighbors(hex.getOrigin()))
                 {
                     if(neighbor.getTerrain() != Hex.Terrain.EMPTY)
                     {
+                        //System.out.println("nonempty neighbor found at " + neighbor.getOrigin());
                         return false;
                     }
                 }
             }
+            //System.out.println("no nonempty neighbors");
             return true;
         }
 

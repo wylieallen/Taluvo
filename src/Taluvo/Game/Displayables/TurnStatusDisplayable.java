@@ -23,7 +23,7 @@ public class TurnStatusDisplayable extends HudElement
     {
         g2d.setColor(Color.BLACK);
         g2d.drawString("TurnPhase: " + gameUberstate.getActivePhase().toString(), drawPt.x + 4, drawPt.y + 16);
-        g2d.drawString("Player: " + gameUberstate.getActivePlayer(), drawPt.x + 4, drawPt.y + 36);
+        g2d.drawString("Player: " + gameUberstate.getActivePlayer().getName(), drawPt.x + 4, drawPt.y + 36);
         g2d.drawString("Building: " + gameUberstate.getActiveBuilding(), drawPt.x + 4, drawPt.y + 56);
         g2d.drawString("Terrain: " + gameUberstate.getActiveTerrain(), drawPt.x + 4, drawPt.y + 76);
         g2d.drawString("State: " + gameUberstate.getEndCondition(), drawPt.x + 4, drawPt.y + 96);

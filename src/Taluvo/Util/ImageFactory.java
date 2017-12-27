@@ -67,34 +67,6 @@ public class ImageFactory
 
     private static BufferedImage noneBuilding = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 
-    private static BufferedImage villageBuilding1 = makeBuildingImage(Color.BLACK, Color.WHITE, "Vi");
-    private static BufferedImage templeBuilding1 = makeBuildingImage(Color.BLACK, Color.WHITE, "Te");
-    private static BufferedImage towerBuilding1 = makeBuildingImage(Color.BLACK, Color.WHITE, "To");
-
-    private static BufferedImage villageBuilding2 = makeBuildingImage(Color.WHITE, Color.BLACK, "Vi");
-    private static BufferedImage templeBuilding2 = makeBuildingImage(Color.WHITE, Color.BLACK, "Te");;
-    private static BufferedImage towerBuilding2 = makeBuildingImage(Color.WHITE, Color.BLACK, "To");;
-
-    private static final Map<Hex.Building, BufferedImage> buildings1;
-    static
-    {
-        buildings1 = new HashMap<>();
-        buildings1.put(Hex.Building.NONE, noneBuilding);
-        buildings1.put(Hex.Building.VILLAGE, villageBuilding1);
-        buildings1.put(Hex.Building.TEMPLE, templeBuilding1);
-        buildings1.put(Hex.Building.TOWER, towerBuilding1);
-    }
-
-    private static final Map<Hex.Building, BufferedImage> buildings2;
-    static
-    {
-        buildings2 = new HashMap<>();
-        buildings2.put(Hex.Building.NONE, noneBuilding);
-        buildings2.put(Hex.Building.VILLAGE, villageBuilding2);
-        buildings2.put(Hex.Building.TEMPLE, templeBuilding2);
-        buildings2.put(Hex.Building.TOWER, towerBuilding2);
-    }
-
     private static final Map<Hex.Building, BufferedImage> nonbuildings;
     static
     {
@@ -105,18 +77,28 @@ public class ImageFactory
         nonbuildings.put(Hex.Building.TOWER, noneBuilding);
     }
 
-    private static final Map<Player, Map<Hex.Building, BufferedImage>> playerToBuildings;
+    private static final Map<String, Map<Hex.Building, BufferedImage>> playerToBuildings;
     static
     {
         playerToBuildings = new HashMap<>();
-        playerToBuildings.put(Player.NONE, nonbuildings);
-        playerToBuildings.put(Player.ONE, buildings1);
-        playerToBuildings.put(Player.TWO, buildings2);
+        playerToBuildings.put(Player.getNullPlayer().getName(), nonbuildings);
     }
 
     public static BufferedImage getBuilding(Player player, Hex.Building building)
     {
-        return playerToBuildings.get(player).get(building);
+        if(!playerToBuildings.containsKey(player.getName()))
+        {
+            //System.out.println("Populating building image map");
+            Color color1 = player.getColor1(), color2 = player.getColor2();
+            Map<Hex.Building, BufferedImage> buildings = new HashMap<>();
+            buildings.put(Hex.Building.NONE, noneBuilding);
+            buildings.put(Hex.Building.VILLAGE, makeBuildingImage(color1, color2, "Vi"));
+            buildings.put(Hex.Building.TEMPLE, makeBuildingImage(color1, color2, "Te"));
+            buildings.put(Hex.Building.TOWER, makeBuildingImage(color1, color2, "To"));
+            playerToBuildings.put(player.getName(), buildings);
+        }
+
+        return playerToBuildings.get(player.getName()).get(building);
     }
 
     private static BufferedImage makeBuildingImage(Color baseColor, Color textColor, String text)

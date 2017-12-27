@@ -60,5 +60,7 @@ public class HexButton extends Button
         g2d.drawImage(ImageFactory.getBuilding(hex.getOwner(), hex.getBuilding()), drawPt.x + 4, drawPt.y + 13, null);
     }
 
-    public static HexButton makeNullButton() { return new HexButton(Hex.getNullHex(), () -> {}); }
+    private static HexButton nullButton = new HexButton(Hex.getNullHex(), () -> {});
+
+    public static HexButton getNullButton() { return nullButton; }
 }

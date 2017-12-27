@@ -76,8 +76,6 @@ public class NaiveClickDetector implements ClickDetector
             }
         }
 
-
-
         return Clickable.getNullClickable();
     }
 }

@@ -4,12 +4,12 @@ import Taluvo.GUI.Clickables.Buttons.ButtonGroup;
 import Taluvo.GUI.Clickables.Buttons.RadialButton;
 import Taluvo.GUI.Clickables.Buttons.RadialButtonGroup;
 import Taluvo.GUI.Displayables.CompositeDisplayable;
+import Taluvo.GUI.Displayables.SimpleDisplayable;
 import Taluvo.Game.Displayables.*;
 import Taluvo.Game.GameModel.*;
 import Taluvo.Util.ImageFactory;
 import Taluvo.Game.Clickables.HexButton;
 import Taluvo.GUI.Clickables.Buttons.Button;
-import Taluvo.GUI.Displayables.SimpleDisplayable;
 import Taluvo.GUI.Uberstate;
 
 import java.awt.*;
@@ -35,21 +35,17 @@ public class GameUberstate extends Uberstate
     private Hex.Building activeBuilding = Hex.Building.VILLAGE;
     private Hex.Terrain activeTerrain = Hex.Terrain.GRASS;
 
-    public GameUberstate(Point origin, Dimension size)
+    public GameUberstate(Point origin, Dimension size, Point camera)
     {
         super(origin, size);
 
         super.addDisplays(hexButtons);
 
-        super.addUnderlay(new SimpleDisplayable(new Point(0, 0),  ImageFactory.makeFilledRect(1280, 720, Color.BLUE)));
-
         activePhase = new TilePlacementPhase();
         activeBuildAction = new PlaceBuilding();
 
-        //board = new Board();
         game = new Game();
         tabulator = new MoveTabulator();
-        tabulator.analyze(game);
 
         // Deck GUI elements:
         super.addRightOverlay(new DeckDisplayable(new Point(1136, 16), game.getDeck()));
@@ -103,25 +99,25 @@ public class GameUberstate extends Uberstate
                 ImageFactory.makeLabeledRect(64, 32, Color.ORANGE, Color.BLACK, Color.BLACK, "TOWER", new Point(8, 18)),
                 () -> {activeBuilding = Hex.Building.TOWER; activeBuildAction = new PlaceBuilding();});
 
-        RadialButton grassButton = new RadialButton(new Point(32, 32),
+        RadialButton grassButton = new RadialButton(new Point(32, 36),
                 ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.BLACK, Color.BLACK, "GRASS", new Point(8, 18)),
                 ImageFactory.makeLabeledRect(64, 32, Color.YELLOW, Color.BLACK, Color.BLACK, "GRASS", new Point(8, 18)),
                 ImageFactory.makeLabeledRect(64, 32, Color.YELLOW, Color.BLACK, Color.BLACK, "GRASS", new Point(8, 18)),
                 () -> {activeTerrain = Hex.Terrain.GRASS; activeBuildAction = new ExpandSettlement();});
 
-        RadialButton jungleButton = new RadialButton(new Point(96, 32),
+        RadialButton jungleButton = new RadialButton(new Point(96, 36),
                 ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.BLACK, Color.BLACK, "JUNGLE", new Point(8, 18)),
                 ImageFactory.makeLabeledRect(64, 32, Color.GREEN, Color.BLACK, Color.BLACK, "JUNGLE", new Point(8, 18)),
                 ImageFactory.makeLabeledRect(64, 32, Color.GREEN, Color.BLACK, Color.BLACK, "JUNGLE", new Point(8, 18)),
                 () -> {activeTerrain = Hex.Terrain.JUNGLE; activeBuildAction = new ExpandSettlement();});
 
-        RadialButton lakeButton = new RadialButton(new Point(32, 64),
+        RadialButton lakeButton = new RadialButton(new Point(32, 68),
                 ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.BLACK, Color.BLACK, "LAKE", new Point(8, 18)),
                 ImageFactory.makeLabeledRect(64, 32, Color.CYAN, Color.BLACK, Color.BLACK, "LAKE", new Point(8, 18)),
                 ImageFactory.makeLabeledRect(64, 32, Color.CYAN, Color.BLACK, Color.BLACK, "LAKE", new Point(8, 18)),
                 () -> {activeTerrain = Hex.Terrain.LAKE; activeBuildAction = new ExpandSettlement();});
 
-        RadialButton rockyButton = new RadialButton(new Point(96, 64),
+        RadialButton rockyButton = new RadialButton(new Point(96, 68),
                 ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.BLACK, Color.BLACK, "ROCKY", new Point(8, 18)),
                 ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.BLACK, Color.BLACK, "ROCKY", new Point(8, 18)),
                 ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.BLACK, Color.BLACK, "ROCKY", new Point(8, 18)),
@@ -135,8 +131,8 @@ public class GameUberstate extends Uberstate
 
         // Player GUI elements:
         super.addCenterOverlay(new CompositeDisplayable(new Point(384, 16),
-                new PlayerPiecesDisplayable(new Point(0, 0), Player.ONE),
-                new PlayerPiecesDisplayable(new Point(288, 0), Player.TWO)));
+                new PlayerPiecesDisplayable(new Point(0, 0), game.getPlayer1()),
+                new PlayerPiecesDisplayable(new Point(288, 0), game.getPlayer2())));
 
         //super.addRightOverlay(new PlayerPiecesDisplayable(new Point(384, 16), Player.ONE));
         //super.addRightOverlay(new PlayerPiecesDisplayable(new Point(672, 16), Player.TWO));
@@ -146,7 +142,7 @@ public class GameUberstate extends Uberstate
         Button aiButton = new Button(new Point(0, 0),
                 ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.BLACK, Color.BLACK, "AI MOVE", new Point(6, 18)),
                 ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.BLACK, Color.BLACK, "AI MOVE", new Point(6, 18)),
-                () -> {tabulator.analyze(game); tabulator.playNextTurn(game);});
+                () -> tabulator.playNextTurn(game));
 
         //emplaceButton(aiButton);
 
@@ -160,7 +156,6 @@ public class GameUberstate extends Uberstate
                     while(game.getEndCondition() == Game.EndCondition.ACTIVE)
                     {
                         //long startTime = System.nanoTime();
-                        tabulator.analyze(game);
                         tabulator.playNextTurn(game);
                         ++turnCount;
                         //long endTime = System.nanoTime();
@@ -168,6 +163,55 @@ public class GameUberstate extends Uberstate
                     }
                     long gameTotal = System.nanoTime() - gameStart;
                     System.out.println("Total time elapsed: " + ((double) gameTotal) / 1000000 + " ms, " + turnCount + " turns taken, avg turn time: " + ((double) gameTotal) / turnCount / 1000000 + " ms");
+
+
+                    update();
+
+                    int minX = 999999, maxX = -999999, minY = 999999, maxY = -999999;
+                    for(HexButton hexButton : hexButtons)
+                    {
+                        Point hexPt = hexButton.getOrigin();
+
+                        //System.out.println("Checking hexPt " + hexPt);
+
+                        if(hexPt.x < minX)
+                        {
+                            minX = hexPt.x;
+                        }
+                        if(hexPt.x + 40 > maxX)
+                        {
+                            maxX = hexPt.x + 40;
+                        }
+                        if(hexPt.y < minY)
+                        {
+                            minY = hexPt.y ;
+                        }
+                        if(hexPt.y + 40> maxY)
+                        {
+                            maxY = hexPt.y + 40;
+                        }
+                    }
+                    //System.out.println("Bounding box origin: " + minX + "," + minY + " terminus: " + maxX + "," + maxY);
+
+                    int width = maxX - minX, height = maxY - minY;
+
+                    //System.out.println("Width " + width + ", Height " + height);
+
+                    Point boardCenter = new Point(minX + width/2, minY + height/2);
+
+                    //System.out.println("Center = " + boardCenter);
+
+                    Dimension dim = getSize();
+
+                    //System.out.println("Setting camerapt from " + camera + " to " + (boardCenter.x + (dim.width / 2)) + "," + (boardCenter.y + (dim.height / 2)));
+
+                    camera.setLocation(dim.width/2, dim.height/2);
+                    camera.translate(-boardCenter.x, -boardCenter.y);
+
+                    //addUnderlay(new SimpleDisplayable(new Point(minX, minY), ImageFactory.makeBorderedRect(width, height, new Color(0xFF, 0xFF, 0xFF, 0xC0), Color.BLACK)));
+                    //camera.setLocation(boardCenter.x + dim.width / 2, boardCenter.y + (dim.height / 2) - 75);
+                    //camera.setLocation(boardCenter);
+
                 });
 
         //emplaceButton(resolveButton);
@@ -203,7 +247,11 @@ public class GameUberstate extends Uberstate
         {
             if(!buttonMap.containsKey(hex.getOrigin()))
             {
-                emplaceHexButton(new HexButton(hex, () -> {executeGameAction(hex.getOrigin());}));
+                emplaceHexButton(new HexButton(hex, () ->
+                {
+                    System.out.println("Legal? " + game.tilePlacementIsLegal(game.getTilePlacementAction(hex, game.getDeck().peek())));
+                    executeGameAction(hex.getOrigin());
+                }));
             }
             else
             {
@@ -226,10 +274,14 @@ public class GameUberstate extends Uberstate
     //    super.addOverlay(button, true);
     //}
 
+    public HexButton getHexButton(Point point)
+    {
+        return buttonMap.getOrDefault(point, HexButton.getNullButton());
+    }
+
     public Hex.Building getActiveBuilding() { return activeBuilding; }
     public TurnPhase getActivePhase() { return activePhase; }
     public Player getActivePlayer() { return game.getActivePlayer(); }
-
     public Hex.Terrain getActiveTerrain() {
         return activeTerrain;
     }

@@ -17,7 +17,7 @@ public class Board
         newHexes = new ArrayList<>();
         settlements = new LinkedHashSet<>();
 
-        Hex hex = new Hex(new Point(16 * 40 - 20, 9 * 40 - 20), 0, Hex.Terrain.EMPTY, -1);
+        Hex hex = new Hex(new Point(0, 0), 0, Hex.Terrain.EMPTY, -1);
         emplaceHex(hex);
     }
 
@@ -144,20 +144,24 @@ public class Board
 
     public Set<Hex> getNeighbors(Point point)
     {
+        //System.out.println("Getting neighbors of " + point);
         Set<Hex> neighbors = new HashSet<>();
         for(Point offset : Hex.neighborOffsets)
         {
             Point neighborPt = new Point(point.x + offset.x, point.y + offset.y);
             neighbors.add(getHex(neighborPt));
+            //System.out.println("Neighbor found at: " + neighborPt);
         }
         return neighbors;
     }
 
     public Hex getNeighbor(Hex hex, int neighborIndex)
     {
+        //System.out.println("Getting neighbor " + neighborIndex + " of " + hex.getOrigin());
         Point targetPt = hex.getOrigin();
         Point offsetPt = Hex.neighborOffsets[neighborIndex];
         Point neighborPt = new Point(targetPt.x + offsetPt.x, targetPt.y + offsetPt.y);
+        //System.out.println("Neighborpt = " + neighborPt);
         return hexMap.get(neighborPt);
     }
 

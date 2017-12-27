@@ -23,7 +23,7 @@ public class PlayerPiecesDisplayable extends HudElement
     public void drawContents(Graphics2D g2d, Point drawPt)
     {
         g2d.setColor(Color.BLACK);
-        g2d.drawString(player.toString(), drawPt.x + 4, drawPt.y + 16);
+        g2d.drawString(player.getName(), drawPt.x + 4, drawPt.y + 16);
         g2d.drawImage(ImageFactory.getBuilding(player, Hex.Building.VILLAGE), drawPt.x + 64, drawPt.y + 8, null);
         g2d.drawImage(ImageFactory.getBuilding(player, Hex.Building.TEMPLE), drawPt.x + 112, drawPt.y + 8, null);
         g2d.drawImage(ImageFactory.getBuilding(player, Hex.Building.TOWER), drawPt.x + 160, drawPt.y + 8, null);

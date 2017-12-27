@@ -18,7 +18,7 @@ public interface Clickable
         {
             public Point getOrigin()
             {
-                return new Point(0, 0);
+                return new Point(-1, -1);
             }
 
             public Dimension getSize()

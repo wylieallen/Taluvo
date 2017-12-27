@@ -1,10 +1,5 @@
 package Taluvo.GUI;
 
-import Taluvo.Game.GameModel.Game;
-import Taluvo.Game.GameModel.Player;
-import Taluvo.Game.GameModel.Settlement;
-import Taluvo.Game.GameUberstate;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -13,21 +8,23 @@ public class InterfacePanel extends JPanel
 {
     private Uberstate activeUberstate;
 
-    private Point offset = new Point(0, 0);
+    private Point camera = new Point(0, 0);
 
     private Point prevPt = new Point(this.getWidth() / 2, this.getHeight() / 2);
 
     public InterfacePanel(Uberstate initialUberstate)
     {
         this.activeUberstate = initialUberstate;
+        centerCamera();
 
         this.addMouseListener(new MouseAdapter(){
             public void mousePressed(MouseEvent event)
             {
                 Point point = event.getPoint();
                 prevPt = point;
-                //point.translate(-offset.x, -offset.y);
-                activeUberstate.checkForPress(point, offset);
+                //point.translate(-camera.x, -camera.y);
+                //System.out.println("Press detected " + point);
+                activeUberstate.checkForPress(point, camera);
                 activeUberstate.update();
                 repaint();
             }
@@ -39,8 +36,8 @@ public class InterfacePanel extends JPanel
             {
                 Point point = event.getPoint();
                 prevPt = point;
-                //point.translate(-offset.x, -offset.y);
-                activeUberstate.checkForHover(point, offset);
+                //point.translate(-camera.x, -camera.y);
+                activeUberstate.checkForHover(point, camera);
                 activeUberstate.update();
                 repaint();
             }
@@ -52,9 +49,10 @@ public class InterfacePanel extends JPanel
                 int dy = point.y - prevPt.y;
                 prevPt = point;
                 translateOffset(dx, dy);
-                //point.translate(-offset.x, -offset.y);
+                //point.translate(-camera.x, -camera.y);
+                //System.out.println("new camerapt " + camera);
 
-                activeUberstate.checkForHover(point, offset);
+                activeUberstate.checkForHover(point, camera);
                 activeUberstate.update();
                 repaint();
             }
@@ -65,15 +63,27 @@ public class InterfacePanel extends JPanel
 
     public void translateOffset(int dx, int dy)
     {
-        offset.translate(dx, dy);
+        camera.translate(dx, dy);
+    }
+
+    public Uberstate getActiveUberstate() {return activeUberstate;}
+
+    public Point getCamera()
+    {
+        return camera;
+    }
+
+    public void centerCamera()
+    {
+        //System.out.println("Setting: " + -getWidth()/2 + " " + -getHeight()/2);
+        Dimension size = getSize();
+        camera.setLocation(size.width/2, size.height/2);
     }
 
     public void setActiveUberstate(Uberstate uberstate)
     {
         activeUberstate = uberstate;
         activeUberstate.update();
-        Player.ONE.reset();
-        Player.TWO.reset();
         changeSize();
         repaint();
     }
@@ -84,7 +94,7 @@ public class InterfacePanel extends JPanel
         Dimension prev = activeUberstate.getSize();
         Dimension next = this.getSize();
         Point translate = new Point((next.width - prev.width) / 2, (next.height - prev.height) / 2);
-        offset.translate(translate.x, translate.y);
+        camera.translate(translate.x, translate.y);
 
         // Update Uberstate:
         activeUberstate.changeSize(this.getSize());
@@ -93,6 +103,6 @@ public class InterfacePanel extends JPanel
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        activeUberstate.drawWithOffset((Graphics2D) g, offset);
+        activeUberstate.drawWithOffset((Graphics2D) g, camera);
     }
 }

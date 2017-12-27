@@ -1,5 +1,6 @@
 package Taluvo.Game.GameModel;
 
+import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -65,7 +66,7 @@ public class Settlement
 
     }
 
-    private static final Settlement nullSettlement = new Settlement(Hex.getNullHex(), -1);
+    private static final Settlement nullSettlement = new Settlement(new Hex(new Point(-1, -1), 0, Hex.Terrain.EMPTY, -1), -1);
 
     public static Settlement getNullSettlement() { return nullSettlement; }
 

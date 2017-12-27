@@ -7,12 +7,26 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum Player
+public class Player
 {
-    NONE(Color.RED, Color.BLUE), ONE(Color.BLACK, Color.WHITE), TWO(Color.WHITE, Color.BLACK);
+    //NONE(Color.RED, Color.BLUE), ONE(Color.BLACK, Color.WHITE), TWO(Color.WHITE, Color.BLACK);
 
-    Player(Color color1, Color color2)
+    private static final Player nullPlayer = new Player("None", Color.RED, Color.BLUE);
+
+    public static Player getNullPlayer() {return nullPlayer;}
+
+    private String name;
+
+    public final Color color1;
+    public final Color color2;
+
+    private int villagers = 20;
+    private int temples = 3;
+    private int towers = 2;
+
+    Player(String name, Color color1, Color color2)
     {
+        this.name = name;
         this.color1 = color1;
         this.color2 = color2;
     }
@@ -23,13 +37,6 @@ public enum Player
         temples = 3;
         towers = 2;
     }
-
-    public final Color color1;
-    public final Color color2;
-
-    private int villagers = 20;
-    private int temples = 3;
-    private int towers = 2;
 
     private Map<Hex.Building, AbstractFunction> buildingDecrementers;
     {
@@ -58,4 +65,9 @@ public enum Player
     public int getVillagers() { return villagers; }
     public int getTemples() { return temples; }
     public int getTowers() { return towers; }
+
+    public Color getColor1() { return color1; }
+    public Color getColor2() { return color2; }
+
+    public String getName() { return name; }
 }

@@ -1,6 +1,7 @@
 package Taluvo;
 
 import Taluvo.GUI.InterfacePanel;
+import Taluvo.Game.GamePanel;
 import Taluvo.Game.GameUberstate;
 
 import javax.swing.*;
@@ -33,7 +34,9 @@ public class TaluvoMain
         frame.setSize(WIDTH + 36, HEIGHT + 82);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        InterfacePanel panel = new InterfacePanel(new GameUberstate(new Point(0, 0), frame.getSize()));
+        //InterfacePanel panel = new InterfacePanel(new GameUberstate(new Point(0, 0), frame.getSize()));
+
+        GamePanel panel = new GamePanel();
 
         panel.setBackground(Color.BLUE);
 
@@ -45,9 +48,14 @@ public class TaluvoMain
         exit.addActionListener(event -> System.exit(0));
 
         JMenuItem reset = new JMenuItem("Reset");
-        reset.addActionListener(event -> {panel.setActiveUberstate(new GameUberstate(new Point(0, 0), panel.getSize()));});
+        //reset.addActionListener(event -> {panel.setActiveUberstate(new GameUberstate(new Point(0, 0), panel.getSize()));});
+        reset.addActionListener(event -> panel.reset());
+
+        JMenuItem autoplay = new JMenuItem("Autoplay");
+        autoplay.addActionListener(event -> panel.autoplayGames());
 
         fileMenu.add(reset);
+        fileMenu.add(autoplay);
         fileMenu.add(exit);
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(fileMenu);

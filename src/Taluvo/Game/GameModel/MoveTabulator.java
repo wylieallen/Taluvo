@@ -57,6 +57,8 @@ public class MoveTabulator
                 Game.TilePlacementAction action = game.getTilePlacementAction(hex, tile);
                 if(game.tilePlacementIsLegal(action))
                 {
+                    //System.out.println("hexloc " + hex.getOrigin());
+
                     legalTilePlacements.add(action);
 
                     if(action.getTarget().getTerrain() == Hex.Terrain.VOLCANO)
@@ -68,12 +70,12 @@ public class MoveTabulator
 
                         int nukeCount = 0;
 
-                        if(hexA.getOwner() != Player.NONE && hexA.getOwner() != game.getActivePlayer())
+                        if(hexA.getOwner() != Player.getNullPlayer() && hexA.getOwner() != game.getActivePlayer())
                         {
                             nukeCount++;
                         }
 
-                        if(hexB.getOwner() != Player.NONE && hexB.getOwner() != game.getActivePlayer())
+                        if(hexB.getOwner() != Player.getNullPlayer() && hexB.getOwner() != game.getActivePlayer())
                         {
                             nukeCount++;
                         }

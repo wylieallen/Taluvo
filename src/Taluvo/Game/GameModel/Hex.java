@@ -29,7 +29,7 @@ public class Hex
         this.tileID = tileID;
         this.settlement = Settlement.getNullSettlement();
         this.building = Building.NONE;
-        this.owner = Player.NONE;
+        this.owner = Player.getNullPlayer();
     }
 
     public Point getOrigin()
@@ -50,9 +50,11 @@ public class Hex
     public Building getBuilding() { return building; }
     public Player getOwner() { return owner; }
 
+    private static final Hex nullHex = new Hex(new Point(-99999, -99999), 0, Terrain.EMPTY, -1);
+
     public static Hex getNullHex()
     {
-        return new Hex(new Point(0, 0), 0, Terrain.EMPTY, -1);
+        return nullHex;
     }
 
     public void setBuilding(Building building, Player owner)

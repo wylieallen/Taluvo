@@ -4,6 +4,7 @@ import Taluvo.GUI.Clickables.Clickable;
 import Taluvo.GUI.Clickables.Detectors.NaiveClickDetector;
 import Taluvo.GUI.Displayables.Displayable;
 import Taluvo.GUI.Clickables.Detectors.ClickDetector;
+import Taluvo.Game.Clickables.HexButton;
 
 import java.awt.Point;
 import java.awt.Dimension;
@@ -51,24 +52,14 @@ public class Uberstate implements Displayable, Clickable
 
     public void drawAt(Graphics2D g2d, Point drawPt)
     {
-        for(Displayable underlay : underlays)
-        {
-            underlay.drawWithOffset(g2d, drawPt);
-        }
+        underlays.forEach(displayable -> displayable.drawWithOffset(g2d, drawPt));
 
         for(Collection<? extends Displayable> set : displayables)
         {
-            for(Displayable displayable : set)
-            {
-                displayable.drawWithOffset(g2d, drawPt);
-            }
+            set.forEach(displayable -> displayable.drawWithOffset(g2d, drawPt));
         }
 
-        for(Displayable overlay : overlays)
-        {
-            //overlay.drawWithOffset(g2d, drawPt);
-            overlay.draw(g2d);
-        }
+        overlays.forEach(displayable -> displayable.draw(g2d));
     }
 
 
@@ -79,7 +70,6 @@ public class Uberstate implements Displayable, Clickable
     public Set<Displayable> getUnderlays() {return underlays;}
     public Set<Displayable> getOverlays() {return overlays;}
     public Set<Collection<? extends Displayable>> getDisplayables() {return displayables;}
-
     public Clickable getActiveClickable() { return activeClickable; }
 
     public void addUnderlay(Displayable underlay) { underlays.add(underlay); }
@@ -118,48 +108,43 @@ public class Uberstate implements Displayable, Clickable
 
     public void update()
     {
-        Set<Displayable> expiredDisplays = new HashSet<>();
-
-        for(Displayable underlay : underlays)
-        {
-            underlay.update();
-            if(underlay.expired())
-            {
-                expiredDisplays.add(underlay);
-            }
-        }
-
-        underlays.removeAll(expiredDisplays);
+        updateDisplays(underlays);
 
         for(Collection<? extends Displayable> collection : displayables)
         {
-            expiredDisplays = new HashSet<>();
-            for(Displayable displayable : collection)
-            {
-                displayable.update();
-                if(displayable.expired())
-                {
-                    expiredDisplays.add(displayable);
-                }
-
-            }
-            //noinspection SuspiciousMethodCalls
-            collection.removeAll(expiredDisplays);
+            updateDisplays(collection);
         }
 
-        expiredDisplays = new HashSet<>();
+        updateDisplays(overlays);
 
-        for(Displayable overlay : overlays)
+        updateClickables(clickables);
+        updateClickables(staticClickables);
+
+        //if(!expiredClickables.isEmpty())
+        //{
+        //    clickDetector.reset();
+        //    clickDetector.initialize(clickables, staticClickables);
+        //}
+    }
+
+    private static void updateDisplays(Collection<? extends Displayable> displayables)
+    {
+        Set<Displayable> expiredDisplayables = new HashSet<>();
+
+        for(Displayable displayable : displayables)
         {
-            overlay.update();
-            if(overlay.expired())
+            displayable.update();
+            if(displayable.expired())
             {
-                expiredDisplays.add(overlay);
+                expiredDisplayables.add(displayable);
             }
         }
 
-        overlays.removeAll(expiredDisplays);
+        displayables.removeAll(expiredDisplayables);
+    }
 
+    private static void updateClickables(Collection<? extends Clickable> clickables)
+    {
         Set<Clickable> expiredClickables = new HashSet<>();
 
         for(Clickable clickable : clickables)
@@ -170,21 +155,7 @@ public class Uberstate implements Displayable, Clickable
             }
         }
 
-        for(Clickable clickable : staticClickables)
-        {
-            if(clickable.expired())
-            {
-                expiredClickables.add(clickable);
-            }
-        }
-
         clickables.removeAll(expiredClickables);
-
-        if(!expiredClickables.isEmpty())
-        {
-            clickDetector.reset();
-            clickDetector.initialize(clickables, staticClickables);
-        }
     }
 
     // Clickable interface:
@@ -196,13 +167,16 @@ public class Uberstate implements Displayable, Clickable
 
     public void checkForHover(Point point, Point offset)
     {
+        Point mousePt = new Point(point.x + offset.x, point.y + offset.y);
         Clickable clickable = clickDetector.getClickable(point, offset);
         if(activeClickable != clickable)
         {
+            //System.out.println("Resetting activeClickable");
             activeClickable.exit();
             activeClickable = clickable;
             activeClickable.enter();
         }
+        //checkForHover(mousePt);
     }
 
     public void checkForPress(Point point)
@@ -235,7 +209,7 @@ public class Uberstate implements Displayable, Clickable
 
     public void changeSize(Dimension newDimension)
     {
-        this.size = newDimension;
+        this.size.setSize(newDimension);
         overlayManager.resetOverlays();
     }
 
