@@ -9,8 +9,6 @@ import java.util.Map;
 
 public class Player
 {
-    //NONE(Color.RED, Color.BLUE), ONE(Color.BLACK, Color.WHITE), TWO(Color.WHITE, Color.BLACK);
-
     private static final Player nullPlayer = new Player("None", Color.RED, Color.BLUE);
 
     public static Player getNullPlayer() {return nullPlayer;}
@@ -29,13 +27,6 @@ public class Player
         this.name = name;
         this.color1 = color1;
         this.color2 = color2;
-    }
-
-    public void reset()
-    {
-        villagers = 20;
-        temples = 3;
-        towers = 2;
     }
 
     private Map<Hex.Building, AbstractFunction> buildingDecrementers;

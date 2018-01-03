@@ -8,13 +8,14 @@ public class InterfacePanel extends JPanel
 {
     private Uberstate activeUberstate;
 
-    private Point camera = new Point(0, 0);
+    private Camera camera;
 
     private Point prevPt = new Point(this.getWidth() / 2, this.getHeight() / 2);
 
     public InterfacePanel(Uberstate initialUberstate)
     {
         this.activeUberstate = initialUberstate;
+        this.camera = new Camera();
         centerCamera();
 
         this.addMouseListener(new MouseAdapter(){
@@ -22,9 +23,7 @@ public class InterfacePanel extends JPanel
             {
                 Point point = event.getPoint();
                 prevPt = point;
-                //point.translate(-camera.x, -camera.y);
-                //System.out.println("Press detected " + point);
-                activeUberstate.checkForPress(point, camera);
+                activeUberstate.checkForPress(point, camera.getDrawOffset());
                 activeUberstate.update();
                 repaint();
             }
@@ -36,8 +35,7 @@ public class InterfacePanel extends JPanel
             {
                 Point point = event.getPoint();
                 prevPt = point;
-                //point.translate(-camera.x, -camera.y);
-                activeUberstate.checkForHover(point, camera);
+                activeUberstate.checkForHover(point, camera.getDrawOffset());
                 activeUberstate.update();
                 repaint();
             }
@@ -48,37 +46,22 @@ public class InterfacePanel extends JPanel
                 int dx = point.x - prevPt.x;
                 int dy = point.y - prevPt.y;
                 prevPt = point;
-                translateOffset(dx, dy);
-                //point.translate(-camera.x, -camera.y);
-                //System.out.println("new camerapt " + camera);
+                translateCamera(dx, dy);
 
-                activeUberstate.checkForHover(point, camera);
+                activeUberstate.checkForHover(point, camera.getDrawOffset());
                 activeUberstate.update();
                 repaint();
             }
         });
-
-        //activeUberstate.update();
     }
 
-    public void translateOffset(int dx, int dy)
-    {
-        camera.translate(dx, dy);
-    }
 
     public Uberstate getActiveUberstate() {return activeUberstate;}
 
-    public Point getCamera()
-    {
-        return camera;
-    }
+    public Camera getCamera() {return camera;}
 
-    public void centerCamera()
-    {
-        //System.out.println("Setting: " + -getWidth()/2 + " " + -getHeight()/2);
-        Dimension size = getSize();
-        camera.setLocation(size.width/2, size.height/2);
-    }
+    public void centerCamera() { camera.center(getSize()); }
+    public void translateCamera(int dx, int dy) { camera.translate(dx, dy); }
 
     public void setActiveUberstate(Uberstate uberstate)
     {
@@ -103,6 +86,6 @@ public class InterfacePanel extends JPanel
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
-        activeUberstate.drawWithOffset((Graphics2D) g, camera);
+        activeUberstate.drawWithOffset((Graphics2D) g, camera.getDrawOffset());
     }
 }

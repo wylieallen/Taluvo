@@ -53,7 +53,7 @@ public class NaiveClickDetector implements ClickDetector
             }
         }
 
-        return Clickable.getNullClickable();
+        return Clickable.getUnclickable();
     }
 
     public Clickable getClickable(Point point, Point offset)
@@ -76,6 +76,6 @@ public class NaiveClickDetector implements ClickDetector
             }
         }
 
-        return Clickable.getNullClickable();
+        return Clickable.getUnclickable();
     }
 }

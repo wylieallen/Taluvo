@@ -4,7 +4,6 @@ import Taluvo.GUI.Clickables.Clickable;
 import Taluvo.GUI.Clickables.Detectors.NaiveClickDetector;
 import Taluvo.GUI.Displayables.Displayable;
 import Taluvo.GUI.Clickables.Detectors.ClickDetector;
-import Taluvo.Game.Clickables.HexButton;
 
 import java.awt.Point;
 import java.awt.Dimension;
@@ -19,7 +18,7 @@ public class Uberstate implements Displayable, Clickable
 
     private ClickDetector clickDetector;
     private Set<Clickable> clickables;
-    private Set<Clickable> staticClickables;
+    private Set<Clickable> fixedClickables;
     private Clickable activeClickable;
 
     protected OverlayManager overlayManager;
@@ -35,12 +34,13 @@ public class Uberstate implements Displayable, Clickable
         underlays = new HashSet<>();
         overlays = new HashSet<>();
 
+        // Collections of intermediate displayables are stored in a LinkedHashSet to preserve insertion order
         displayables = new LinkedHashSet<>();
 
         clickables = new HashSet<>();
-        staticClickables = new HashSet<>();
+        fixedClickables = new HashSet<>();
         clickDetector = new NaiveClickDetector();
-        activeClickable = Clickable.getNullClickable();
+        activeClickable = Clickable.getUnclickable();
 
         overlayManager = new OverlayManager();
     }
@@ -100,9 +100,9 @@ public class Uberstate implements Displayable, Clickable
         clickDetector.add(clickable);
     }
 
-    public void addStaticClickable(Clickable clickable)
+    public void addFixedClickable(Clickable clickable)
     {
-        staticClickables.add(clickable);
+        fixedClickables.add(clickable);
         clickDetector.addStatic(clickable);
     }
 
@@ -118,13 +118,7 @@ public class Uberstate implements Displayable, Clickable
         updateDisplays(overlays);
 
         updateClickables(clickables);
-        updateClickables(staticClickables);
-
-        //if(!expiredClickables.isEmpty())
-        //{
-        //    clickDetector.reset();
-        //    clickDetector.initialize(clickables, staticClickables);
-        //}
+        updateClickables(fixedClickables);
     }
 
     private static void updateDisplays(Collection<? extends Displayable> displayables)
@@ -167,16 +161,8 @@ public class Uberstate implements Displayable, Clickable
 
     public void checkForHover(Point point, Point offset)
     {
-        Point mousePt = new Point(point.x + offset.x, point.y + offset.y);
         Clickable clickable = clickDetector.getClickable(point, offset);
-        if(activeClickable != clickable)
-        {
-            //System.out.println("Resetting activeClickable");
-            activeClickable.exit();
-            activeClickable = clickable;
-            activeClickable.enter();
-        }
-        //checkForHover(mousePt);
+        changeActiveClickable(clickable);
     }
 
     public void checkForPress(Point point)
@@ -194,6 +180,11 @@ public class Uberstate implements Displayable, Clickable
     public void checkForHover(Point point)
     {
         Clickable clickable = clickDetector.getClickable(point);
+        changeActiveClickable(clickable);
+    }
+
+    private void changeActiveClickable(Clickable clickable)
+    {
         if(activeClickable != clickable)
         {
             activeClickable.exit();
@@ -276,15 +267,28 @@ public class Uberstate implements Displayable, Clickable
 
         private void updateLocations(int centerX, Collection<Displayable> overlays)
         {
-            int y = edgeBuffer;
+            double y = edgeBuffer;
+
+            int maxHeight = size.height;
+            int usedSpace = edgeBuffer * 2;
+            for(Displayable overlay : overlays)
+            {
+                usedSpace += overlay.getSize().height;
+            }
+            int freeSpace = maxHeight - usedSpace;
+            double elementBuffer =  overlays.size() > 1 ? freeSpace / (overlays.size() - 1) : freeSpace;
+
+            //System.out.println("maxHeight " + maxHeight + ", usedSpace = " + usedSpace + ", bufferSize = " + elementBuffer);
 
             for(Displayable overlay : overlays)
             {
                 Dimension size = overlay.getSize();
 
+                //System.out.println("Next overlay: " + overlay.getClass() + " at " + (centerX - (size.width / 2)) + ", " + y);
+
                 overlay.getOrigin().setLocation(centerX - (size.width / 2), y);
 
-                y += componentBuffer + size.height;
+                y += elementBuffer + size.height; //componentBuffer + size.height;
             }
         }
 

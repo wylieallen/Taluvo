@@ -1,12 +1,8 @@
 package Taluvo;
 
-import Taluvo.GUI.InterfacePanel;
 import Taluvo.Game.GamePanel;
-import Taluvo.Game.GameUberstate;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -18,12 +14,7 @@ public class TaluvoMain
 
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run()
-            {
-                createAndShowGUI();
-            }
-        });
+        SwingUtilities.invokeLater(TaluvoMain::createAndShowGUI);
     }
 
     public static void createAndShowGUI()
@@ -33,8 +24,6 @@ public class TaluvoMain
         frame.setTitle("Taluvo v0.0");
         frame.setSize(WIDTH + 36, HEIGHT + 82);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        //InterfacePanel panel = new InterfacePanel(new GameUberstate(new Point(0, 0), frame.getSize()));
 
         GamePanel panel = new GamePanel();
 
@@ -48,11 +37,21 @@ public class TaluvoMain
         exit.addActionListener(event -> System.exit(0));
 
         JMenuItem reset = new JMenuItem("Reset");
-        //reset.addActionListener(event -> {panel.setActiveUberstate(new GameUberstate(new Point(0, 0), panel.getSize()));});
         reset.addActionListener(event -> panel.reset());
 
         JMenuItem autoplay = new JMenuItem("Autoplay");
-        autoplay.addActionListener(event -> panel.autoplayGames());
+        autoplay.addActionListener(event ->
+        {
+            SwingWorker<Integer, Integer> autoplayer = new SwingWorker<Integer, Integer>()
+            {
+                protected Integer doInBackground()
+                {
+                    panel.autoplayGames();
+                    return 1;
+                }
+            };
+            autoplayer.execute();
+        });
 
         fileMenu.add(reset);
         fileMenu.add(autoplay);
@@ -65,8 +64,6 @@ public class TaluvoMain
         {
             public void componentResized(ComponentEvent evt)
             {
-                //Component c = (Component) evt.getSource();
-
                 panel.changeSize();
             }
 
@@ -78,7 +75,6 @@ public class TaluvoMain
         });
 
         frame.validate();
-        //frame.setUndecorated(true);
         frame.setVisible(true);
     }
 }

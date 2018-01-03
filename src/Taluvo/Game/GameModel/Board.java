@@ -11,11 +11,15 @@ public class Board
 
     private Set<Settlement> settlements;
 
+    private boolean settlementsChanged;
+
     public Board()
     {
         hexMap = new HashMap<>();
         newHexes = new ArrayList<>();
         settlements = new LinkedHashSet<>();
+
+        settlementsChanged = false;
 
         Hex hex = new Hex(new Point(0, 0), 0, Hex.Terrain.EMPTY, -1);
         emplaceHex(hex);
@@ -43,6 +47,19 @@ public class Board
                 settlement.incorporateAdjacentHexes(this);
             }
         }
+
+        settlementsChanged = true;
+    }
+
+    public boolean settlementsHaveChanged()
+    {
+        if(settlementsChanged)
+        {
+            settlementsChanged = false;
+            return true;
+        }
+
+        return false;
     }
 
     public void placeBuilding(Point point, Hex.Building building, Player player)

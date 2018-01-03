@@ -38,7 +38,7 @@ public class GamePanel extends InterfacePanel
         for(int i = 0; i < numberOfGames; i++)
         {
             System.out.println("Starting Game #" + i);
-            //Game newGame = new Game(new Point(16 * 40 - 20, 9 * 40 - 20));
+
             Game newGame = new Game();
             // Toggle first player:
             playerFirst = !playerFirst;

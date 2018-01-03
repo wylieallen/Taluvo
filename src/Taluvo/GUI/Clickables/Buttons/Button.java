@@ -3,6 +3,7 @@ package Taluvo.GUI.Clickables.Buttons;
 import Taluvo.GUI.Clickables.Clickable;
 import Taluvo.GUI.Displayables.SimpleDisplayable;
 import Taluvo.Util.AbstractFunction;
+import Taluvo.Util.ImageFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -20,6 +21,14 @@ public class Button extends SimpleDisplayable implements Clickable
         this.baseImage = baseImage;
         this.hoverImage = hoverImage;
         this.pressFunction = pressFunction;
+    }
+
+    public static Button makeLabeledButton(Point origin, Dimension size, String label, AbstractFunction pressFunction)
+    {
+        return new Button(origin,
+                ImageFactory.makeLabeledRect(size.width, size.height, Color.WHITE, Color.BLACK, Color.BLACK, label, new Point(6, 18)),
+                ImageFactory.makeLabeledRect(size.width, size.height, Color.RED, Color.BLACK, Color.BLACK, label, new Point(6, 18)),
+                pressFunction);
     }
 
     public boolean pointIsOn(Point point)

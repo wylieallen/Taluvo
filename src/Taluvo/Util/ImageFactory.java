@@ -12,47 +12,36 @@ public class ImageFactory
 {
     private static Shape hexagon = makeHexShape();
 
-    private static BufferedImage emptyHex = makeHex(41, 41, Color.WHITE, Color.BLACK);
-    private static BufferedImage hoverEmptyHex = makeHex(41, 41, Color.PINK, Color.BLACK);
-
-    private static BufferedImage volcanoHex = makeHex(41, 41, Color.RED, Color.BLACK);
-    private static BufferedImage hoverVolcanoHex = makeHex(41, 41, Color.PINK, Color.BLACK);
-
-    private static BufferedImage rockyHex = makeHex(41, 41, Color.LIGHT_GRAY, Color.BLACK);
-    private static BufferedImage hoverRockyHex = makeHex(41, 41, Color.PINK, Color.BLACK);
-
-    private static BufferedImage lakeHex = makeHex(41, 41, Color.CYAN, Color.BLACK);
-    private static BufferedImage hoverLakeHex = makeHex(41, 41, Color.PINK, Color.BLACK);
-
-    private static BufferedImage jungleHex = makeHex(41, 41, Color.GREEN, Color.BLACK);
-    private static BufferedImage hoverJungleHex = makeHex(41, 41, Color.PINK, Color.BLACK);
-
-    private static BufferedImage grassHex = makeHex(41, 41, Color.YELLOW, Color.BLACK);
-    private static BufferedImage hoverGrassHex = makeHex(41, 41, Color.PINK, Color.BLACK);
-
-
-    private static final Map<Hex.Terrain, BufferedImage> baseTerrainHexes;
+    private static final Map<Hex.Terrain, Color> terrainColors = new HashMap<>();
     static
     {
-        baseTerrainHexes = new HashMap<>();
-        baseTerrainHexes.put(Hex.Terrain.EMPTY, emptyHex);
-        baseTerrainHexes.put(Hex.Terrain.VOLCANO, volcanoHex);
-        baseTerrainHexes.put(Hex.Terrain.ROCKY, rockyHex);
-        baseTerrainHexes.put(Hex.Terrain.LAKE, lakeHex);
-        baseTerrainHexes.put(Hex.Terrain.JUNGLE, jungleHex);
-        baseTerrainHexes.put(Hex.Terrain.GRASS, grassHex);
+        terrainColors.put(Hex.Terrain.EMPTY, Color.WHITE);
+        terrainColors.put(Hex.Terrain.VOLCANO, Color.RED);
+        terrainColors.put(Hex.Terrain.GRASS, Color.YELLOW);
+        terrainColors.put(Hex.Terrain.ROCKY, Color.LIGHT_GRAY);
+        terrainColors.put(Hex.Terrain.LAKE, Color.CYAN);
+        terrainColors.put(Hex.Terrain.JUNGLE, Color.GREEN);
     }
 
-    private static final Map<Hex.Terrain, BufferedImage> hoverTerrainHexes;
+    public static Color getTerrainColor(Hex.Terrain terrain) {return terrainColors.get(terrain);}
+
+    private static final Map<Hex.Terrain, BufferedImage> baseTerrainHexes = new HashMap<>();
     static
     {
-        hoverTerrainHexes = new HashMap<>();
-        hoverTerrainHexes.put(Hex.Terrain.EMPTY, hoverEmptyHex);
-        hoverTerrainHexes.put(Hex.Terrain.VOLCANO, hoverVolcanoHex);
-        hoverTerrainHexes.put(Hex.Terrain.ROCKY, hoverRockyHex);
-        hoverTerrainHexes.put(Hex.Terrain.LAKE, hoverLakeHex);
-        hoverTerrainHexes.put(Hex.Terrain.JUNGLE, hoverJungleHex);
-        hoverTerrainHexes.put(Hex.Terrain.GRASS, hoverGrassHex);
+        for(Hex.Terrain terrain : Hex.Terrain.values())
+        {
+            baseTerrainHexes.put(terrain, makeHex(41, 41, getTerrainColor(terrain), Color.BLACK));
+        }
+    }
+
+    private static final Map<Hex.Terrain, BufferedImage> hoverTerrainHexes = new HashMap<>();
+    static
+    {
+        BufferedImage hoverHex = makeHex(41, 41, Color.PINK, Color.BLACK);
+        for(Hex.Terrain terrain : Hex.Terrain.values())
+        {
+            hoverTerrainHexes.put(terrain, hoverHex);
+        }
     }
 
     public static Shape makeHexShape()
@@ -114,6 +103,7 @@ public class ImageFactory
         g2d.drawString(text, 4, 15);
         return image;
     }
+
     public static BufferedImage makeFilledRect(int width, int height, Color color)
     {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -159,6 +149,14 @@ public class ImageFactory
         g2d.fill(hexagon);
         g2d.setColor(borderColor);
         g2d.draw(hexagon);
+        return image;
+    }
+
+    public static BufferedImage getVolcanoHexOnBackground(int width, int height)
+    {
+        BufferedImage image = makeBorderedRect(width, height, Color.WHITE, Color.BLACK);
+        BufferedImage hex = getBaseHex(Hex.Terrain.VOLCANO);
+        image.createGraphics().drawImage(hex, 44, 44, null);
         return image;
     }
 

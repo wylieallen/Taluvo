@@ -15,7 +15,11 @@ public class SimpleDisplayable implements Displayable {
         this.dimension = new Dimension(image.getWidth(), image.getHeight());
     }
 
-    protected void setImage(BufferedImage image) {this.image = image;}
+    protected void setImage(BufferedImage image)
+    {
+        this.image = image;
+        this.dimension.setSize(image.getWidth(), image.getHeight());
+    }
 
     public BufferedImage getImage() {return image;}
 

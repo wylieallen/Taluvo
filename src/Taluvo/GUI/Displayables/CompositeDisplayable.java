@@ -1,9 +1,7 @@
 package Taluvo.GUI.Displayables;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class CompositeDisplayable implements Displayable
 {
@@ -14,8 +12,9 @@ public class CompositeDisplayable implements Displayable
     public CompositeDisplayable(Point origin, Displayable... components)
     {
         this.origin = origin;
-        this.components = new HashSet<>();
+        this.components = new LinkedHashSet<>();
         this.components.addAll(Arrays.asList(components));
+        this.size = new Dimension();
 
         recalculateSize();
     }
@@ -34,7 +33,7 @@ public class CompositeDisplayable implements Displayable
             if(maxY < pointEndY) maxY = pointEndY;
         }
 
-        this.size = new Dimension(maxX, maxY);
+        this.size.setSize(maxX, maxY);
     }
 
     public Point getOrigin() {return origin;}
@@ -59,12 +58,31 @@ public class CompositeDisplayable implements Displayable
                 expiredComponents.add(component);
             }
         }
-        components.removeAll(expiredComponents);
+        removeAll(expiredComponents);
     }
 
     public void add(Displayable displayable)
     {
         components.add(displayable);
+        recalculateSize();
     }
-    public void remove(Displayable displayable) { components.remove(displayable); }
+
+    public void addAll(Collection<? extends Displayable> displayables)
+    {
+        components.addAll(displayables);
+        recalculateSize();
+    }
+
+    public void remove(Displayable displayable)
+    {
+        components.remove(displayable);
+        recalculateSize();
+    }
+
+    public void removeAll(Collection<? extends Displayable> displayables)
+    {
+        components.removeAll(displayables);
+        recalculateSize();
+    }
+
 }
