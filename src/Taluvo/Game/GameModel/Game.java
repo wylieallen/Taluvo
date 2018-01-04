@@ -239,15 +239,6 @@ public class Game
 
         private boolean targetHexesHaveOnlyEmptyNeighbors(Hex... hexes)
         {
-            String hexpts = "";
-
-            for(Hex hex : hexes)
-            {
-                hexpts += hex.getOrigin() + ", ";
-            }
-
-           // System.out.println("Checking hexes " + hexpts);
-
             for(Hex hex : hexes)
             {
                 for(Hex neighbor : board.getNeighbors(hex.getOrigin()))

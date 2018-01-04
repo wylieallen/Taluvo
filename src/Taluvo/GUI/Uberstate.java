@@ -2,6 +2,7 @@ package Taluvo.GUI;
 
 import Taluvo.GUI.Clickables.Clickable;
 import Taluvo.GUI.Clickables.Detectors.NaiveClickDetector;
+import Taluvo.GUI.Clickables.Overlay;
 import Taluvo.GUI.Displayables.Displayable;
 import Taluvo.GUI.Clickables.Detectors.ClickDetector;
 
@@ -74,22 +75,25 @@ public class Uberstate implements Displayable, Clickable
 
     public void addUnderlay(Displayable underlay) { underlays.add(underlay); }
 
-    public void addLeftOverlay(Displayable overlay)
+    public void addLeftOverlay(Overlay overlay)
     {
         overlays.add(overlay);
         overlayManager.addLeft(overlay);
+        addFixedClickable(overlay);
     }
 
-    public void addCenterOverlay(Displayable overlay)
+    public void addCenterOverlay(Overlay overlay)
     {
         overlays.add(overlay);
         overlayManager.addCenter(overlay);
+        addFixedClickable(overlay);
     }
 
-    public void addRightOverlay(Displayable overlay)
+    public void addRightOverlay(Overlay overlay)
     {
         overlays.add(overlay);
         overlayManager.addRight(overlay);
+        addFixedClickable(overlay);
     }
 
     public void addDisplays(Collection<? extends Displayable> newDisplays) { displayables.add(newDisplays); }

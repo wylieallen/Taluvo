@@ -154,7 +154,7 @@ public class ImageFactory
 
     public static BufferedImage getVolcanoHexOnBackground(int width, int height)
     {
-        BufferedImage image = makeBorderedRect(width, height, Color.WHITE, Color.BLACK);
+        BufferedImage image = makeBorderedRect(width, height, Color.WHITE, Color.GRAY);
         BufferedImage hex = getBaseHex(Hex.Terrain.VOLCANO);
         image.createGraphics().drawImage(hex, 44, 44, null);
         return image;

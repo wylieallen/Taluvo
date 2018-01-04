@@ -40,7 +40,7 @@ public class GameUberstate extends Uberstate
     {
         super(origin, size);
 
-        super.addDisplays(hexButtons);
+        addDisplays(hexButtons);
 
         activePhase = new TilePlacementPhase();
         activeBuildAction = new PlaceBuilding();
@@ -50,20 +50,15 @@ public class GameUberstate extends Uberstate
 
         // Deck GUI elements:
         Overlay deckOverlay = OverlayMaker.makeDeckOverlay(game.getDeck());
-        super.addRightOverlay(deckOverlay);
-        super.addFixedClickable(deckOverlay);
+        addRightOverlay(deckOverlay);
 
         // Hex Detail GUI element:
-        //super.addRightOverlay(new HexDetailDisplayable(new Point(1120, 224), this));
         Overlay hexDetailOverlay = OverlayMaker.makeHexDetailOverlay(this);
-        super.addRightOverlay(hexDetailOverlay);
-        super.addFixedClickable(hexDetailOverlay);
+        addRightOverlay(hexDetailOverlay);
 
         // Turn Status GUI element:
-        //super.addRightOverlay(new TurnStatusDisplayable(new Point(1120, 376), this));
         Overlay turnStatusOverlay = OverlayMaker.makeTurnStatusOverlay(this);
-        super.addRightOverlay(turnStatusOverlay);
-        super.addFixedClickable(turnStatusOverlay);
+        addRightOverlay(turnStatusOverlay);
 
         // Building selection radial buttons:
         RadialButton villagerButton = makeBuildingSelector(new Point(32, 0), Hex.Building.VILLAGE);
@@ -75,37 +70,23 @@ public class GameUberstate extends Uberstate
         RadialButton lakeButton = makeTerrainSelector(new Point(0, 100), Hex.Terrain.LAKE);
         RadialButton rockyButton = makeTerrainSelector(new Point(64, 100), Hex.Terrain.ROCKY);
 
-        RadialButtonGroup buildingSelectGroup = new RadialButtonGroup(new Point(1088, 480),
+        RadialButtonGroup buildingSelectGroup = new RadialButtonGroup(new Point(0, 0),
                 villagerButton, templeButton, towerButton, grassButton, jungleButton, lakeButton, rockyButton);
 
-        addFixedClickable(buildingSelectGroup);
-        addRightOverlay(buildingSelectGroup);
+        Overlay buildingSelectOverlay = new Overlay(new Point());
+        buildingSelectOverlay.add(buildingSelectGroup);
+        buildingSelectOverlay.addClickable(buildingSelectGroup);
+
+        addRightOverlay(buildingSelectOverlay);
 
         // Player GUI elements:
-        //super.addCenterOverlay(new CompositeDisplayable(new Point(384, 16),
-        //        new PlayerPiecesDisplayable(new Point(0, 0), game.getPlayer1()),
-        //        new PlayerPiecesDisplayable(new Point(288, 0), game.getPlayer2())));
-
-        /*
-        PlayerPiecesOverlay player1Overlay = new PlayerPiecesOverlay(new Point(0, 0), game.getPlayer1());
-        PlayerPiecesOverlay player2Overlay = new PlayerPiecesOverlay(new Point(288, 0), game.getPlayer2());
-        Overlay playersOverlay = new Overlay(new Point());
-        playersOverlay.add(player1Overlay);
-        playersOverlay.addClickable(player1Overlay);
-        playersOverlay.add(player2Overlay);
-        playersOverlay.addClickable(player2Overlay);
-        */
 
         Overlay playersOverlay = OverlayMaker.makePlayersPiecesOverlay(game.getPlayer1(), game.getPlayer2());
-
-        super.addCenterOverlay(playersOverlay);
-        super.addFixedClickable(playersOverlay);
+        addCenterOverlay(playersOverlay);
 
         // AI action button:
 
         Button aiButton = Button.makeLabeledButton(new Point(0, 0), new Dimension(64, 32), "AI MOVE", () -> tabulator.playNextTurn(game));
-
-        //emplaceButton(aiButton);
 
         Button resolveButton = Button.makeLabeledButton(new Point(80, 0), new Dimension(64, 32), "RESOLVE",
                 () ->
@@ -142,20 +123,17 @@ public class GameUberstate extends Uberstate
 
                 });
 
-        //emplaceButton(resolveButton);
+        ButtonGroup aiGroup = new ButtonGroup(new Point(0, 0), aiButton, resolveButton);
 
-        ButtonGroup aiGroup = new ButtonGroup(new Point(16, 680), aiButton, resolveButton);
-
+        Overlay aiButtonOverlay = new Overlay(new Point());
+        aiButtonOverlay.add(aiGroup);
+        aiButtonOverlay.addClickable(aiGroup);
 
         // Settlements GUI element:
 
-        //super.addLeftOverlay(new SettlementsDisplayable(new Point(16, 16), game.getBoard(), overlayManager));
         Overlay settlementOverlay = OverlayMaker.makeSettlementsOverlay(this, game.getBoard(), overlayManager);//new SettlementOverlay(this, game.getBoard(), overlayManager);
         addLeftOverlay(settlementOverlay);
-        addFixedClickable(settlementOverlay);
-
-        addFixedClickable(aiGroup);
-        addLeftOverlay(aiGroup);
+        addLeftOverlay(aiButtonOverlay);
 
         // Initialize starting HexButtons:
         for(Hex hex : game.getNewHexes())
@@ -167,9 +145,9 @@ public class GameUberstate extends Uberstate
     private RadialButton makeBuildingSelector(Point point, Hex.Building building)
     {
         return new RadialButton(point,
-                ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.BLACK, Color.BLACK, building.toString(), new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.BLACK, Color.BLACK, building.toString(), new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.BLACK, Color.BLACK, building.toString(), new Point(8, 18)),
+                ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, building.toString(), new Point(8, 18)),
+                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, building.toString(), new Point(8, 18)),
+                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, building.toString(), new Point(8, 18)),
                 () -> {activeBuilding = building; activeBuildAction = new PlaceBuilding();});
     }
 
@@ -177,9 +155,9 @@ public class GameUberstate extends Uberstate
     {
         Color terrainColor = ImageFactory.getTerrainColor(terrain);
         return new RadialButton(point,
-                ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.BLACK, Color.BLACK, terrain.toString(), new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, terrainColor, Color.BLACK, Color.BLACK, terrain.toString(), new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, terrainColor, Color.BLACK, Color.BLACK, terrain.toString(), new Point(8, 18)),
+                ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, terrain.toString(), new Point(8, 18)),
+                ImageFactory.makeLabeledRect(64, 32, terrainColor, Color.GRAY, Color.BLACK, terrain.toString(), new Point(8, 18)),
+                ImageFactory.makeLabeledRect(64, 32, terrainColor, Color.GRAY, Color.BLACK, terrain.toString(), new Point(8, 18)),
                 () -> {activeTerrain = terrain; activeBuildAction = new ExpandSettlement();});
     }
 

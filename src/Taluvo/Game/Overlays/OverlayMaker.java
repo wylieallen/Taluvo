@@ -61,7 +61,7 @@ public class OverlayMaker
     {
         Overlay hexDetailOverlay = new Overlay(new Point());
 
-        hexDetailOverlay.add(new SimpleDisplayable(new Point(0, 0), ImageFactory.makeBorderedRect(144, 148, Color.WHITE, Color.BLACK)));
+        hexDetailOverlay.add(new SimpleDisplayable(new Point(0, 0), ImageFactory.makeBorderedRect(144, 148, Color.WHITE, Color.GRAY)));
 
         Point hexImageOrigin = new Point(100, 4);
 
@@ -98,7 +98,7 @@ public class OverlayMaker
     {
         Overlay turnStatusOverlay = new Overlay(new Point());
 
-        turnStatusOverlay.add(new SimpleDisplayable(new Point(0, 0), ImageFactory.makeBorderedRect(144, 104, Color.WHITE, Color.BLACK)));
+        turnStatusOverlay.add(new SimpleDisplayable(new Point(0, 0), ImageFactory.makeBorderedRect(144, 104, Color.WHITE, Color.GRAY)));
         turnStatusOverlay.add(new StringDisplayable(new Point(4, 0),
                 () ->
                         "TurnPhase: " + gameUberstate.getActivePhase().toString() + "\nPlayer: " + gameUberstate.getActivePlayer().getName()
@@ -113,8 +113,8 @@ public class OverlayMaker
     public static Overlay makePlayersPiecesOverlay(Player player1, Player player2)
     {
         Overlay playersOverlay = new Overlay(new Point());
-        Overlay player1Overlay = makePlayerPiecesOverlay(player1);
-        Overlay player2Overlay = makePlayerPiecesOverlay(player2);
+        Overlay player1Overlay = makePlayerPiecesOverlay(player1, new Point(0, 0));
+        Overlay player2Overlay = makePlayerPiecesOverlay(player2, new Point(288, 0));
 
         playersOverlay.add(player1Overlay);
         playersOverlay.add(player2Overlay);
@@ -125,15 +125,15 @@ public class OverlayMaker
         return playersOverlay;
     }
 
-    private static Overlay makePlayerPiecesOverlay(Player player)
+    private static Overlay makePlayerPiecesOverlay(Player player, Point origin)
     {
-        Overlay playerOverlay = new Overlay(new Point());
+        Overlay playerOverlay = new Overlay(origin);
 
-        playerOverlay.add(new SimpleDisplayable(new Point(0, 0), ImageFactory.makeBorderedRect(224, 64, Color.WHITE, Color.BLACK)));
+        playerOverlay.add(new SimpleDisplayable(new Point(0, 0), ImageFactory.makeBorderedRect(224, 64, Color.WHITE, Color.GRAY)));
 
         playerOverlay.add(new StringDisplayable(new Point(4, 0), player::getName));
 
-        // Todo: prerender this onto one image and combine into a single SimpleDisplayable
+        // Todo: prerender the buildings and background (and maybe player name) onto one image and combine into a single SimpleDisplayable
         playerOverlay.add(new SimpleDisplayable(new Point(64, 8), ImageFactory.getBuilding(player, Hex.Building.VILLAGE)));
         playerOverlay.add(new SimpleDisplayable(new Point(112, 8), ImageFactory.getBuilding(player, Hex.Building.TEMPLE)));
         playerOverlay.add(new SimpleDisplayable(new Point(160, 8), ImageFactory.getBuilding(player, Hex.Building.TOWER)));
@@ -151,7 +151,7 @@ public class OverlayMaker
     {
         Overlay settlementsOverlay = new Overlay(new Point())
         {
-            private Set<Button> settlementClickables = new LinkedHashSet<>();
+            private Set<SettlementButton> settlementClickables = new LinkedHashSet<>();
 
             private Dimension buttonSize = new Dimension(128, 16);
 
@@ -171,7 +171,7 @@ public class OverlayMaker
                     {
                         Point origin = new Point(0, y);
 
-                        SettlementDisplayable settlementButton = new SettlementDisplayable(origin, settlement);
+                        SettlementButton settlementButton = new SettlementButton(origin, settlement);
 
                         settlementClickables.add(settlementButton);
                         //settlementClickables.addClickable(settlementButton);
@@ -186,16 +186,16 @@ public class OverlayMaker
                 }
             }
 
-            class SettlementDisplayable extends Button
+            class SettlementButton extends Button
             {
                 private Set<HexButton> hexes;
 
-                public SettlementDisplayable(Point origin, Settlement settlement)
+                public SettlementButton(Point origin, Settlement settlement)
                 {
                     super(origin,
                             ImageFactory.makeLabeledRect(buttonSize.width, buttonSize.height, settlement.getOwner().getColor1(), Color.GRAY, settlement.getOwner().getColor2(),
                                     "Settlement " + settlement.getSettlementID() + " Size: " + settlement.getSize(), new Point(4, 12)),
-                            ImageFactory.makeLabeledRect(buttonSize.width, buttonSize.height, Color.PINK, Color.GRAY, settlement.getOwner().getColor2(),
+                            ImageFactory.makeLabeledRect(buttonSize.width, buttonSize.height, Color.PINK, Color.GRAY, Color.BLACK,
                                     "Settlement " + settlement.getSettlementID() + " Size: " + settlement.getSize(), new Point(4, 12)),
                             () -> {});
 
