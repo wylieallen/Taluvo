@@ -1,7 +1,7 @@
 package Taluvo.Game.GameModel;
 
 import java.awt.*;
-import java.util.Collection;
+import java.util.*;
 import java.util.List;
 
 public class Game
@@ -14,8 +14,9 @@ public class Game
 
     private Player activePlayer;
 
-    private Player player1;
-    private Player player2;
+    private Iterator<Player> playerIterator;
+
+    private List<Player> players;
 
     public Game()
     {
@@ -25,8 +26,16 @@ public class Game
 
         endCondition = EndCondition.ACTIVE;
 
-        activePlayer = player1 = new Player("One", Color.BLACK, Color.WHITE);
-        player2 = new Player("Two", Color.WHITE, Color.BLACK);
+        players = new ArrayList<>();
+
+        players.add(new Player("One", Color.BLACK, Color.WHITE));
+        players.add(new Player("Two", Color.WHITE, Color.BLACK));
+        players.add(new Player("Three", Color.BLUE, Color.RED));
+        players.add(new Player("Four", Color.MAGENTA, Color.YELLOW));
+
+        playerIterator = players.iterator();
+
+        activePlayer = playerIterator.next();
     }
 
     public void placeTile(Point point, Tile tile)
@@ -58,14 +67,23 @@ public class Game
 
 
         // Toggle player
-        activePlayer = activePlayer == player1 ? player2 : player1;
+        //activePlayer = (activePlayer == player1 ? player2 : player1);
+
+        if(!playerIterator.hasNext())
+        {
+            playerIterator = players.iterator();
+        }
+
+        activePlayer = playerIterator.next();
 
         // if active player has no legal moves, endCondition = EndCondition.NO_MOVES;
     }
 
     public void forfeit()
     {
-        endCondition = EndCondition.NO_MOVES;
+        playerIterator.remove();
+        activePlayer = playerIterator.next();
+        //endCondition = EndCondition.NO_MOVES;
     }
 
     public boolean tilePlacementIsLegal(TilePlacementAction action) { return rules.tilePlacementIsLegal(action.getTarget().getOrigin(), action.getTile()); }
@@ -83,9 +101,8 @@ public class Game
 
     public Deck getDeck() {return deck;}
 
-    public Player getActivePlayer() {return activePlayer;}
-    public Player getPlayer1() {return player1;}
-    public Player getPlayer2() {return player2;}
+    public Player getActivePlayer() { return activePlayer; }
+    public Player getPlayer(int index) { return players.get(index); }
 
     public EndCondition getEndCondition() { return endCondition; }
 

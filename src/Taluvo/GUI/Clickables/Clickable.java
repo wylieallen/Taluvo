@@ -15,7 +15,6 @@ public interface Clickable
     default void press() {}
     default void enter() {}
     default void exit() {}
-    default boolean expired() { return false; }
 
     static Clickable getUnclickable()
     {
@@ -33,6 +32,7 @@ public interface Clickable
             {
                 return false;
             }
+
         };
     }
 

@@ -63,11 +63,13 @@ public class InterfacePanel extends JPanel
     public void centerCamera() { camera.center(getSize()); }
     public void translateCamera(int dx, int dy) { camera.translate(dx, dy); }
 
-    public void setActiveUberstate(Uberstate uberstate)
+    protected void setActiveUberstate(Uberstate uberstate)
     {
         activeUberstate = uberstate;
+        activeUberstate.clearHover();
         activeUberstate.update();
         changeSize();
+        centerCamera();
         repaint();
     }
 

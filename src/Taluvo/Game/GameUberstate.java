@@ -11,11 +11,16 @@ import Taluvo.GUI.Displayables.Displayable;
 import Taluvo.GUI.Displayables.SimpleDisplayable;
 import Taluvo.Game.GameModel.*;
 import Taluvo.Game.Overlays.*;
+import Taluvo.Game.PlayerControllers.AgentPlayerController;
+import Taluvo.Game.PlayerControllers.LocalPlayerController;
+import Taluvo.Game.PlayerControllers.PlayerController;
+import Taluvo.Util.AbstractFunction;
 import Taluvo.Util.ImageFactory;
 import Taluvo.Game.Clickables.HexButton;
 import Taluvo.GUI.Clickables.Buttons.Button;
 import Taluvo.GUI.Uberstate;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,15 +35,23 @@ public class GameUberstate extends Uberstate
     private Map<Point, HexButton> buttonMap = new HashMap<>();
     private Set<HexButton> hexButtons = new HashSet<>();
 
+    private PlayerController activeController;
+
     private TurnPhase activePhase;
     private BuildMode activeBuildAction;
 
     private Hex.Building activeBuilding = Hex.Building.VILLAGE;
     private Hex.Terrain activeTerrain = Hex.Terrain.GRASS;
 
-    public GameUberstate(Point origin, Dimension size, Camera camera)
+    private Map<Player, PlayerController> controllerMap = new HashMap<>();
+
+    private AbstractFunction repainter;
+
+    public GameUberstate(Point origin, Dimension size, Camera camera, AbstractFunction repainter, PlayerController... playerControllers)
     {
         super(origin, size);
+
+        this.repainter = repainter;
 
         addDisplays(hexButtons);
 
@@ -73,18 +86,17 @@ public class GameUberstate extends Uberstate
         RadialButtonGroup buildingSelectGroup = new RadialButtonGroup(new Point(0, 0),
                 villagerButton, templeButton, towerButton, grassButton, jungleButton, lakeButton, rockyButton);
 
-        Overlay buildingSelectOverlay = new Overlay(new Point());
-        buildingSelectOverlay.add(buildingSelectGroup);
-        buildingSelectOverlay.addClickable(buildingSelectGroup);
-
-        addRightOverlay(buildingSelectOverlay);
+        addRightOverlay(buildingSelectGroup);
 
         // Player GUI elements:
 
-        Overlay playersOverlay = OverlayMaker.makePlayersPiecesOverlay(game.getPlayer1(), game.getPlayer2());
+        Overlay playersOverlay = OverlayMaker.makePlayersPiecesOverlay(game.getPlayer(0), game.getPlayer(1));
         addCenterOverlay(playersOverlay);
 
-        // AI action button:
+        Overlay otherPlayersOverlay = OverlayMaker.makePlayersPiecesOverlay(game.getPlayer(2), game.getPlayer(3));
+        addCenterOverlay(otherPlayersOverlay);
+
+        // AI action buttons:
 
         Button aiButton = Button.makeLabeledButton(new Point(0, 0), new Dimension(64, 32), "AI MOVE", () -> tabulator.playNextTurn(game));
 
@@ -125,21 +137,26 @@ public class GameUberstate extends Uberstate
 
         ButtonGroup aiGroup = new ButtonGroup(new Point(0, 0), aiButton, resolveButton);
 
-        Overlay aiButtonOverlay = new Overlay(new Point());
-        aiButtonOverlay.add(aiGroup);
-        aiButtonOverlay.addClickable(aiGroup);
-
         // Settlements GUI element:
 
         Overlay settlementOverlay = OverlayMaker.makeSettlementsOverlay(this, game.getBoard(), overlayManager);//new SettlementOverlay(this, game.getBoard(), overlayManager);
         addLeftOverlay(settlementOverlay);
-        addLeftOverlay(aiButtonOverlay);
+        addLeftOverlay(aiGroup);
 
         // Initialize starting HexButtons:
         for(Hex hex : game.getNewHexes())
         {
             emplaceHexButton(new HexButton(hex, () -> {executeGameAction(hex.getOrigin());}));
         }
+
+        // Initialize controllers:
+        for(int i = 0; i < playerControllers.length; i++)
+        {
+            controllerMap.put(game.getPlayer(i), playerControllers[i]);
+        }
+
+        activeController = controllerMap.get(game.getActivePlayer());
+        activeController.activate(this);
     }
 
     private RadialButton makeBuildingSelector(Point point, Hex.Building building)
@@ -161,6 +178,11 @@ public class GameUberstate extends Uberstate
                 () -> {activeTerrain = terrain; activeBuildAction = new ExpandSettlement();});
     }
 
+    // Is locking necessary? ...
+    //public void lockGameInput() {locked = true;}
+    //public void unlockGameInput() {locked = false;}
+    //public boolean isLocked() {return locked;}
+
     public void executeGameAction(Point point)
     {
         activePhase.performAction(point);
@@ -175,7 +197,7 @@ public class GameUberstate extends Uberstate
             {
                 emplaceHexButton(new HexButton(hex, () ->
                 {
-                    System.out.println("Legal? " + game.tilePlacementIsLegal(game.getTilePlacementAction(hex, game.getDeck().peek())));
+                    //System.out.println("Legal? " + game.tilePlacementIsLegal(game.getTilePlacementAction(hex, game.getDeck().peek())));
                     executeGameAction(hex.getOrigin());
                 }));
             }
@@ -196,7 +218,7 @@ public class GameUberstate extends Uberstate
         while(game.getEndCondition() == Game.EndCondition.ACTIVE)
         {
             //long startTime = System.nanoTime();
-            tabulator.playNextTurn(game);
+            playNextTurn();
             ++turnCount;
             //long endTime = System.nanoTime();
             //System.out.println("Time elapsed during turn: " + ((double) (endTime - startTime)) / 1000000 + " ms");
@@ -212,6 +234,11 @@ public class GameUberstate extends Uberstate
         super.addClickable(button);
         hexButtons.add(button);
         buttonMap.put(button.getOrigin(), button);
+    }
+
+    public void repaint()
+    {
+        repainter.execute();
     }
 
     //private void emplaceButton(Button button)
@@ -234,6 +261,23 @@ public class GameUberstate extends Uberstate
 
     public Game.EndCondition getEndCondition() { return game.getEndCondition(); }
 
+    public MoveTabulator getTabulator() { return tabulator; }
+
+    public void playNextTurn()
+    {
+        tabulator.playNextTurn(game);
+        endTurn();
+    }
+
+    public void endTurn()
+    {
+        if(game.getEndCondition() == Game.EndCondition.ACTIVE)
+        {
+            activeController.deactivate();
+            activeController = controllerMap.get(game.getActivePlayer());
+            activeController.activate(this);
+        }
+    }
 
     // Turn Phases:
     public interface TurnPhase
@@ -260,6 +304,7 @@ public class GameUberstate extends Uberstate
         public void performAction(Point point)
         {
             activeBuildAction.performAction(point);
+            endTurn();
         }
 
         public String toString() {return "BUILD";}

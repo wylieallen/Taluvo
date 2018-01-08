@@ -4,7 +4,7 @@ import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Settlement
+public class Settlement implements Comparable<Settlement>
 {
     private Set<Hex> hexes;
     private Player owner;
@@ -37,6 +37,11 @@ public class Settlement
     public int getSettlementID() {return settlementID;}
     public int getSize() {return hexes.size();}
     public Set<Hex> getHexes() {return hexes;}
+
+    public int compareTo(Settlement settlement)
+    {
+        return this.settlementID - settlement.getSettlementID();
+    }
 
     public void incorporateAdjacentHexes(Board board)
     {

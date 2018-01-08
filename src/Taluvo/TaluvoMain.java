@@ -1,6 +1,7 @@
 package Taluvo;
 
 import Taluvo.Game.GamePanel;
+import Taluvo.Game.StartUberstate;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,8 +28,6 @@ public class TaluvoMain
 
         GamePanel panel = new GamePanel();
 
-        panel.setBackground(Color.BLUE);
-
         frame.getContentPane().add(panel, BorderLayout.CENTER);
 
         JMenu fileMenu = new JMenu("File");
@@ -39,22 +38,7 @@ public class TaluvoMain
         JMenuItem reset = new JMenuItem("Reset");
         reset.addActionListener(event -> panel.reset());
 
-        JMenuItem autoplay = new JMenuItem("Autoplay");
-        autoplay.addActionListener(event ->
-        {
-            SwingWorker<Integer, Integer> autoplayer = new SwingWorker<Integer, Integer>()
-            {
-                protected Integer doInBackground()
-                {
-                    panel.autoplayGames();
-                    return 1;
-                }
-            };
-            autoplayer.execute();
-        });
-
         fileMenu.add(reset);
-        fileMenu.add(autoplay);
         fileMenu.add(exit);
         JMenuBar menuBar = new JMenuBar();
         menuBar.add(fileMenu);

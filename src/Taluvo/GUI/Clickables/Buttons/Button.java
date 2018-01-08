@@ -90,4 +90,11 @@ public class Button extends SimpleDisplayable implements Clickable
     public BufferedImage getBaseImage() {return baseImage;}
     public BufferedImage getHoverImage() {return hoverImage;}
 
+    private static Button nullButton = new Button(new Point(-1, -1),
+            new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB),
+            new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB),
+            () -> {});
+
+    public static Button getNullButton() {return nullButton;}
+
 }

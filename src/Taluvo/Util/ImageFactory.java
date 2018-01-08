@@ -160,5 +160,16 @@ public class ImageFactory
         return image;
     }
 
+    public static BufferedImage makeText(String string, Font font, Color color)
+    {
+        FontMetrics metrics = (new Canvas()).getFontMetrics(font);
+        BufferedImage image = new BufferedImage(metrics.stringWidth(string), metrics.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = image.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setColor(color);
+        g2d.setFont(font);
+        g2d.drawString(string, 0, metrics.getHeight());
+        return image;
+    }
 
 }

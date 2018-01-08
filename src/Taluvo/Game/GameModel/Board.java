@@ -2,6 +2,9 @@ package Taluvo.Game.GameModel;
 
 import java.awt.Point;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Board
 {
@@ -16,8 +19,8 @@ public class Board
     public Board()
     {
         hexMap = new HashMap<>();
-        newHexes = new ArrayList<>();
-        settlements = new LinkedHashSet<>();
+        newHexes = new CopyOnWriteArrayList<>();
+        settlements = new ConcurrentSkipListSet<>();
 
         settlementsChanged = false;
 
@@ -33,10 +36,7 @@ public class Board
 
         Collection<Hex> hexes = hexMap.values();
 
-        for(Hex hex : hexes)
-        {
-            hex.setSettlement(Settlement.getNullSettlement());
-        }
+        hexes.forEach(hex -> hex.setSettlement(Settlement.getNullSettlement()));
 
         for(Hex hex : hexes)
         {

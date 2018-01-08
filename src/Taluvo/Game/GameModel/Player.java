@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class Player
 {
-    private static final Player nullPlayer = new Player("None", Color.RED, Color.BLUE);
+    private static final Player nullPlayer = new Player("None", Color.LIGHT_GRAY, Color.DARK_GRAY);
 
     public static Player getNullPlayer() {return nullPlayer;}
 

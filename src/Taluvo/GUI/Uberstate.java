@@ -73,23 +73,29 @@ public class Uberstate implements Displayable, Clickable
     public Set<Collection<? extends Displayable>> getDisplayables() {return displayables;}
     public Clickable getActiveClickable() { return activeClickable; }
 
+    public void clearHover()
+    {
+        activeClickable.exit();
+        activeClickable = Clickable.getUnclickable();
+    }
+
     public void addUnderlay(Displayable underlay) { underlays.add(underlay); }
 
-    public void addLeftOverlay(Overlay overlay)
+    public <T extends Displayable & Clickable> void addLeftOverlay(T overlay)
     {
         overlays.add(overlay);
         overlayManager.addLeft(overlay);
         addFixedClickable(overlay);
     }
 
-    public void addCenterOverlay(Overlay overlay)
+    public <T extends Displayable & Clickable> void addCenterOverlay(T overlay)
     {
         overlays.add(overlay);
         overlayManager.addCenter(overlay);
         addFixedClickable(overlay);
     }
 
-    public void addRightOverlay(Overlay overlay)
+    public <T extends Displayable & Clickable> void addRightOverlay(T overlay)
     {
         overlays.add(overlay);
         overlayManager.addRight(overlay);
@@ -121,8 +127,6 @@ public class Uberstate implements Displayable, Clickable
 
         updateDisplays(overlays);
 
-        updateClickables(clickables);
-        updateClickables(fixedClickables);
     }
 
     private static void updateDisplays(Collection<? extends Displayable> displayables)
@@ -139,21 +143,6 @@ public class Uberstate implements Displayable, Clickable
         }
 
         displayables.removeAll(expiredDisplayables);
-    }
-
-    private static void updateClickables(Collection<? extends Clickable> clickables)
-    {
-        Set<Clickable> expiredClickables = new HashSet<>();
-
-        for(Clickable clickable : clickables)
-        {
-            if(clickable.expired())
-            {
-                expiredClickables.add(clickable);
-            }
-        }
-
-        clickables.removeAll(expiredClickables);
     }
 
     // Clickable interface:
@@ -215,7 +204,6 @@ public class Uberstate implements Displayable, Clickable
         private List<Displayable> rightOverlays;
 
         private int edgeBuffer = 12;
-        private int componentBuffer = 16;
 
         public OverlayManager()
         {
@@ -300,5 +288,7 @@ public class Uberstate implements Displayable, Clickable
         {
             updateLocations(edgeBuffer + (getMaxX(leftOverlays) / 2), leftOverlays);
         }
+
+        public void resetCenterOverlays() { updateLocations((size.width / 2), centerOverlays); }
     }
 }

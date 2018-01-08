@@ -167,6 +167,7 @@ public class OverlayMaker
 
                     int y = 21;
 
+                    // Todo: Not thread-safe, currently working around it by using Concurrent structures in Board
                     for(Settlement settlement : board.getSettlements())
                     {
                         Point origin = new Point(0, y);
