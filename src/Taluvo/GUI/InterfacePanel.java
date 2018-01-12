@@ -1,8 +1,11 @@
 package Taluvo.GUI;
 
+import com.sun.corba.se.impl.orbutil.graph.Graph;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
 
 public class InterfacePanel extends JPanel
 {
@@ -71,6 +74,7 @@ public class InterfacePanel extends JPanel
         changeSize();
         centerCamera();
         repaint();
+
     }
 
     public void changeSize()
@@ -88,6 +92,7 @@ public class InterfacePanel extends JPanel
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+
         activeUberstate.drawWithOffset((Graphics2D) g, camera.getDrawOffset());
     }
 }

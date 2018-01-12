@@ -4,15 +4,10 @@ import Taluvo.GUI.Camera;
 import Taluvo.GUI.Clickables.Buttons.ButtonGroup;
 import Taluvo.GUI.Clickables.Buttons.RadialButton;
 import Taluvo.GUI.Clickables.Buttons.RadialButtonGroup;
-import Taluvo.GUI.Clickables.Clickable;
 import Taluvo.GUI.Clickables.Overlay;
-import Taluvo.GUI.Displayables.CompositeDisplayable;
-import Taluvo.GUI.Displayables.Displayable;
-import Taluvo.GUI.Displayables.SimpleDisplayable;
 import Taluvo.Game.GameModel.*;
 import Taluvo.Game.Overlays.*;
-import Taluvo.Game.PlayerControllers.AgentPlayerController;
-import Taluvo.Game.PlayerControllers.LocalPlayerController;
+import Taluvo.Game.PlayerControllers.AbstractPlayerController;
 import Taluvo.Game.PlayerControllers.PlayerController;
 import Taluvo.Util.AbstractFunction;
 import Taluvo.Util.ImageFactory;
@@ -20,12 +15,8 @@ import Taluvo.Game.Clickables.HexButton;
 import Taluvo.GUI.Clickables.Buttons.Button;
 import Taluvo.GUI.Uberstate;
 
-import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GameUberstate extends Uberstate
 {
@@ -47,7 +38,13 @@ public class GameUberstate extends Uberstate
 
     private AbstractFunction repainter;
 
-    public GameUberstate(Point origin, Dimension size, Camera camera, AbstractFunction repainter, PlayerController... playerControllers)
+    private boolean locked = true;
+
+    private ButtonGroup postgameButtons;
+
+    public GameUberstate(Point origin, Dimension size, Camera camera,
+                         AbstractFunction repainter, AbstractFunction rematcher, AbstractFunction resetter,
+                         PlayerController... playerControllers)
     {
         super(origin, size);
 
@@ -58,7 +55,13 @@ public class GameUberstate extends Uberstate
         activePhase = new TilePlacementPhase();
         activeBuildAction = new PlaceBuilding();
 
-        game = new Game();
+        Player[] players = new Player[playerControllers.length];
+        for(int i = 0; i < players.length; i++)
+        {
+            players[i] = playerControllers[i].makeNewPlayer();
+        }
+
+        game = new Game(players);
         tabulator = new MoveTabulator();
 
         // Deck GUI elements:
@@ -74,14 +77,14 @@ public class GameUberstate extends Uberstate
         addRightOverlay(turnStatusOverlay);
 
         // Building selection radial buttons:
-        RadialButton villagerButton = makeBuildingSelector(new Point(32, 0), Hex.Building.VILLAGE);
-        RadialButton templeButton = makeBuildingSelector(new Point(0, 32), Hex.Building.TEMPLE);
-        RadialButton towerButton = makeBuildingSelector(new Point(64, 32), Hex.Building.TOWER);
+        RadialButton villagerButton = makeBuildingSelector(new Point(33, 0), Hex.Building.VILLAGE);
+        RadialButton templeButton = makeBuildingSelector(new Point(0, 34), Hex.Building.TEMPLE);
+        RadialButton towerButton = makeBuildingSelector(new Point(66, 34), Hex.Building.TOWER);
 
-        RadialButton grassButton = makeTerrainSelector(new Point(0, 68), Hex.Terrain.GRASS);
-        RadialButton jungleButton = makeTerrainSelector(new Point(64, 68), Hex.Terrain.JUNGLE);
-        RadialButton lakeButton = makeTerrainSelector(new Point(0, 100), Hex.Terrain.LAKE);
-        RadialButton rockyButton = makeTerrainSelector(new Point(64, 100), Hex.Terrain.ROCKY);
+        RadialButton grassButton = makeTerrainSelector(new Point(0, 76), Hex.Terrain.GRASS);
+        RadialButton jungleButton = makeTerrainSelector(new Point(66, 76), Hex.Terrain.JUNGLE);
+        RadialButton lakeButton = makeTerrainSelector(new Point(0, 110), Hex.Terrain.LAKE);
+        RadialButton rockyButton = makeTerrainSelector(new Point(66, 110), Hex.Terrain.ROCKY);
 
         RadialButtonGroup buildingSelectGroup = new RadialButtonGroup(new Point(0, 0),
                 villagerButton, templeButton, towerButton, grassButton, jungleButton, lakeButton, rockyButton);
@@ -90,11 +93,23 @@ public class GameUberstate extends Uberstate
 
         // Player GUI elements:
 
-        Overlay playersOverlay = OverlayMaker.makePlayersPiecesOverlay(game.getPlayer(0), game.getPlayer(1));
+        int playerMidpoint = players.length / 2;
+
+        Player[] playersNorth = Arrays.copyOf(players, playerMidpoint);
+        Player[] playersSouth = Arrays.copyOfRange(players, playerMidpoint, players.length);
+
+        Overlay playersOverlay = OverlayMaker.makePlayersPiecesOverlay(playersNorth);
         addCenterOverlay(playersOverlay);
 
-        Overlay otherPlayersOverlay = OverlayMaker.makePlayersPiecesOverlay(game.getPlayer(2), game.getPlayer(3));
+        Overlay otherPlayersOverlay = OverlayMaker.makePlayersPiecesOverlay(playersSouth);
         addCenterOverlay(otherPlayersOverlay);
+
+        // Endgame buttons:
+
+        Button rematchButton = Button.makeLabeledButton(new Point(0, 0), new Dimension(96, 32), "REMATCH", rematcher);
+        Button mainMenuButton = Button.makeLabeledButton(new Point(0, 36), new Dimension(96, 32), "MAIN MENU", resetter);
+
+        postgameButtons = new ButtonGroup(new Point(), rematchButton, mainMenuButton);
 
         // AI action buttons:
 
@@ -141,18 +156,19 @@ public class GameUberstate extends Uberstate
 
         Overlay settlementOverlay = OverlayMaker.makeSettlementsOverlay(this, game.getBoard(), overlayManager);//new SettlementOverlay(this, game.getBoard(), overlayManager);
         addLeftOverlay(settlementOverlay);
-        addLeftOverlay(aiGroup);
+
+        //addLeftOverlay(aiGroup);
 
         // Initialize starting HexButtons:
         for(Hex hex : game.getNewHexes())
         {
-            emplaceHexButton(new HexButton(hex, () -> {executeGameAction(hex.getOrigin());}));
+            emplaceHexButton(new HexButton(hex, () -> {if(!locked) { executeGameAction(hex.getOrigin()); }}));
         }
 
         // Initialize controllers:
         for(int i = 0; i < playerControllers.length; i++)
         {
-            controllerMap.put(game.getPlayer(i), playerControllers[i]);
+            controllerMap.put(players[i], playerControllers[i]);
         }
 
         activeController = controllerMap.get(game.getActivePlayer());
@@ -162,9 +178,9 @@ public class GameUberstate extends Uberstate
     private RadialButton makeBuildingSelector(Point point, Hex.Building building)
     {
         return new RadialButton(point,
-                ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, building.toString(), new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, building.toString(), new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, building.toString(), new Point(8, 18)),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, building.toString()),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, building.toString()),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, building.toString()),
                 () -> {activeBuilding = building; activeBuildAction = new PlaceBuilding();});
     }
 
@@ -172,16 +188,16 @@ public class GameUberstate extends Uberstate
     {
         Color terrainColor = ImageFactory.getTerrainColor(terrain);
         return new RadialButton(point,
-                ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, terrain.toString(), new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, terrainColor, Color.GRAY, Color.BLACK, terrain.toString(), new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, terrainColor, Color.GRAY, Color.BLACK, terrain.toString(), new Point(8, 18)),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, terrain.toString()),
+                ImageFactory.makeCenterLabeledRect(64, 32, terrainColor, Color.GRAY, Color.BLACK, terrain.toString()),
+                ImageFactory.makeCenterLabeledRect(64, 32, terrainColor, Color.GRAY, Color.BLACK, terrain.toString()),
                 () -> {activeTerrain = terrain; activeBuildAction = new ExpandSettlement();});
     }
 
     // Is locking necessary? ...
-    //public void lockGameInput() {locked = true;}
-    //public void unlockGameInput() {locked = false;}
-    //public boolean isLocked() {return locked;}
+    public void lockGameInput() {locked = true;}
+    public void unlockGameInput() {locked = false;}
+    public boolean isLocked() {return locked;}
 
     public void executeGameAction(Point point)
     {
@@ -195,11 +211,7 @@ public class GameUberstate extends Uberstate
         {
             if(!buttonMap.containsKey(hex.getOrigin()))
             {
-                emplaceHexButton(new HexButton(hex, () ->
-                {
-                    //System.out.println("Legal? " + game.tilePlacementIsLegal(game.getTilePlacementAction(hex, game.getDeck().peek())));
-                    executeGameAction(hex.getOrigin());
-                }));
+                emplaceHexButton(new HexButton(hex, () -> {if(!locked) { executeGameAction(hex.getOrigin()); }}));
             }
             else
             {
@@ -273,9 +285,13 @@ public class GameUberstate extends Uberstate
     {
         if(game.getEndCondition() == Game.EndCondition.ACTIVE)
         {
-            activeController.deactivate();
+            activeController.deactivate(this);
             activeController = controllerMap.get(game.getActivePlayer());
             activeController.activate(this);
+        }
+        else
+        {
+            super.addLeftOverlay(postgameButtons);
         }
     }
 

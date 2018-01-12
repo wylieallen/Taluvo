@@ -4,6 +4,7 @@ import Taluvo.GUI.Clickables.Buttons.Button;
 import Taluvo.GUI.Clickables.Buttons.ButtonGroup;
 import Taluvo.GUI.Clickables.Clickable;
 import Taluvo.GUI.Clickables.Overlay;
+import Taluvo.GUI.Displayables.ConditionalDisplayable;
 import Taluvo.GUI.Displayables.FunctorDisplayable;
 import Taluvo.GUI.Displayables.SimpleDisplayable;
 import Taluvo.GUI.Displayables.StringDisplayable;
@@ -110,17 +111,19 @@ public class OverlayMaker
         return turnStatusOverlay;
     }
 
-    public static Overlay makePlayersPiecesOverlay(Player player1, Player player2)
+    public static Overlay makePlayersPiecesOverlay(Player... players)
     {
         Overlay playersOverlay = new Overlay(new Point());
-        Overlay player1Overlay = makePlayerPiecesOverlay(player1, new Point(0, 0));
-        Overlay player2Overlay = makePlayerPiecesOverlay(player2, new Point(288, 0));
 
-        playersOverlay.add(player1Overlay);
-        playersOverlay.add(player2Overlay);
+        int x = 0;
 
-        playersOverlay.addClickable(player1Overlay);
-        playersOverlay.addClickable(player2Overlay);
+        for(Player player : players)
+        {
+            Overlay playerOverlay = makePlayerPiecesOverlay(player, new Point(x, 0));
+            playersOverlay.add(playerOverlay);
+            playersOverlay.addClickable(playerOverlay);
+            x += 288;
+        }
 
         return playersOverlay;
     }
@@ -129,7 +132,15 @@ public class OverlayMaker
     {
         Overlay playerOverlay = new Overlay(origin);
 
-        playerOverlay.add(new SimpleDisplayable(new Point(0, 0), ImageFactory.makeBorderedRect(224, 64, Color.WHITE, Color.GRAY)));
+        //playerOverlay.add(new SimpleDisplayable(new Point(0, 0), ImageFactory.makeBorderedRect(224, 64, Color.WHITE, Color.GRAY)));
+
+        ConditionalDisplayable background = new ConditionalDisplayable(new Point(0, 0),
+                new SimpleDisplayable(new Point(0, 0), ImageFactory.makeBorderedRect(224, 64, Color.WHITE, Color.GRAY)));
+
+        background.add(player::isLoser, new SimpleDisplayable(new Point(0, 0), ImageFactory.makeBorderedRect(224, 64, Color.RED, Color.GRAY)));
+        background.add(player::isWinner,  new SimpleDisplayable(new Point(0, 0), ImageFactory.makeBorderedRect(224, 64, Color.GREEN, Color.GRAY)));
+
+        playerOverlay.add(background);
 
         playerOverlay.add(new StringDisplayable(new Point(4, 0), player::getName));
 
@@ -175,7 +186,6 @@ public class OverlayMaker
                         SettlementButton settlementButton = new SettlementButton(origin, settlement);
 
                         settlementClickables.add(settlementButton);
-                        //settlementClickables.addClickable(settlementButton);
 
                         y += buttonSize.height;
                     }
@@ -194,10 +204,10 @@ public class OverlayMaker
                 public SettlementButton(Point origin, Settlement settlement)
                 {
                     super(origin,
-                            ImageFactory.makeLabeledRect(buttonSize.width, buttonSize.height, settlement.getOwner().getColor1(), Color.GRAY, settlement.getOwner().getColor2(),
-                                    "Settlement " + settlement.getSettlementID() + " Size: " + settlement.getSize(), new Point(4, 12)),
-                            ImageFactory.makeLabeledRect(buttonSize.width, buttonSize.height, Color.PINK, Color.GRAY, Color.BLACK,
-                                    "Settlement " + settlement.getSettlementID() + " Size: " + settlement.getSize(), new Point(4, 12)),
+                            ImageFactory.makeLeftLabeledRect(buttonSize.width, buttonSize.height, settlement.getOwner().getColor1(), Color.GRAY, settlement.getOwner().getColor2(),
+                                    "Settlement " + settlement.getSettlementID() + " Size: " + settlement.getSize()),
+                            ImageFactory.makeLeftLabeledRect(buttonSize.width, buttonSize.height, Color.PINK, Color.GRAY, Color.BLACK,
+                                    "Settlement " + settlement.getSettlementID() + " Size: " + settlement.getSize()),
                             () -> {});
 
                     this.hexes = new HashSet<>();
@@ -223,7 +233,7 @@ public class OverlayMaker
         };
 
         settlementsOverlay.add(new SimpleDisplayable(new Point(0, 0),
-                ImageFactory.makeLabeledRect(128, 21, Color.WHITE, Color.GRAY, Color.BLACK, "Settlements:", new Point(28, 16))));
+                ImageFactory.makeCenterLabeledRect(128, 21, Color.WHITE, Color.GRAY, Color.BLACK, "Settlements:")));
 
         settlementsOverlay.addClickable(Clickable.makeNullClickable(new Point(0, 0), new Dimension(128, 21)));
 

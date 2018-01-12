@@ -126,17 +126,33 @@ public class ImageFactory
         return image;
     }
 
-    public static BufferedImage makeLabeledRect(int width, int height, Color bodyColor, Color borderColor, Color textColor, String text, Point textPt)
+    public static BufferedImage makeCenterLabeledRect(int width, int height, Color bodyColor, Color borderColor, Color textColor, String text)
     {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        FontMetrics metrics = g2d.getFontMetrics();
         g2d.setColor(bodyColor);
         g2d.fillRect(0, 0, width, height);
         g2d.setColor(borderColor);
         g2d.drawRect(0, 0, width - 1, height - 1);
         g2d.setColor(textColor);
-        g2d.drawString(text, textPt.x, textPt.y);
+        g2d.drawString(text, (width / 2) - (metrics.stringWidth(text) / 2), (height/2) + (metrics.getHeight()/4));
+        return image;
+    }
+
+    public static BufferedImage makeLeftLabeledRect(int width, int height, Color bodyColor, Color borderColor, Color textColor, String text)
+    {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = image.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        FontMetrics metrics = g2d.getFontMetrics();
+        g2d.setColor(bodyColor);
+        g2d.fillRect(0, 0, width, height);
+        g2d.setColor(borderColor);
+        g2d.drawRect(0, 0, width - 1, height - 1);
+        g2d.setColor(textColor);
+        g2d.drawString(text, 2, (height/2) + (metrics.getHeight()/4));
         return image;
     }
 
@@ -163,7 +179,7 @@ public class ImageFactory
     public static BufferedImage makeText(String string, Font font, Color color)
     {
         FontMetrics metrics = (new Canvas()).getFontMetrics(font);
-        BufferedImage image = new BufferedImage(metrics.stringWidth(string), metrics.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage(metrics.stringWidth(string), metrics.getHeight() + 2, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setColor(color);
@@ -171,5 +187,4 @@ public class ImageFactory
         g2d.drawString(string, 0, metrics.getHeight());
         return image;
     }
-
 }

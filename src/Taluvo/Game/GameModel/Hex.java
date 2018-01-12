@@ -81,15 +81,17 @@ public class Hex
 
     public enum Building
     {
-        VILLAGE(true, false), TOWER(true, true), TEMPLE(true, true), NONE(false, false);
+        VILLAGE(true, false, 1), TOWER(true, true, 75), TEMPLE(true, true, 200), NONE(false, false, 0);
 
         public final boolean occupiesHex;
         public final boolean permanent;
+        public final int points;
 
-        Building(boolean occupiesHex, boolean permanent)
+        Building(boolean occupiesHex, boolean permanent, int points)
         {
             this.occupiesHex = occupiesHex;
             this.permanent = permanent;
+            this.points = points;
         }
     }
 

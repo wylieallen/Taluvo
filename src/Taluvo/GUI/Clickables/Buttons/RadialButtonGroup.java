@@ -1,18 +1,16 @@
 package Taluvo.GUI.Clickables.Buttons;
 
-import Taluvo.GUI.Clickables.Clickable;
-import Taluvo.GUI.Displayables.CompositeDisplayable;
-import Taluvo.GUI.Displayables.Displayable;
-
 import java.awt.*;
 
 public class RadialButtonGroup extends ButtonGroup
 {
-    private RadialButton depressedButton = RadialButton.getNullButton();
+    private RadialButton depressedButton;
 
     public RadialButtonGroup(Point origin, RadialButton... buttons)
     {
         super(origin, buttons);
+        depressedButton = buttons[0];
+        depressedButton.press();
     }
 
     @Override

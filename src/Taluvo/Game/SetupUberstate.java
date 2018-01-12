@@ -4,7 +4,6 @@ import Taluvo.GUI.Clickables.Buttons.Button;
 import Taluvo.GUI.Clickables.Buttons.RadialButton;
 import Taluvo.GUI.Clickables.Buttons.RadialButtonGroup;
 import Taluvo.GUI.Clickables.Overlay;
-import Taluvo.GUI.InterfacePanel;
 import Taluvo.GUI.Uberstate;
 import Taluvo.Game.PlayerControllers.AgentPlayerController;
 import Taluvo.Game.PlayerControllers.LocalPlayerController;
@@ -12,6 +11,7 @@ import Taluvo.Game.PlayerControllers.PlayerController;
 import Taluvo.Util.ImageFactory;
 
 import java.awt.*;
+import java.util.Arrays;
 
 
 public class SetupUberstate extends Uberstate
@@ -21,6 +21,9 @@ public class SetupUberstate extends Uberstate
     private PlayerController[] playerControllers = new PlayerController[4];
 
     private RadialButtonGroup[] playerSelectors = new RadialButtonGroup[4];
+
+    private Color[][] playerColors;
+    private String[] playerNames;
 
     private GamePanel panel;
 
@@ -32,9 +35,22 @@ public class SetupUberstate extends Uberstate
 
         addCenterOverlay(Button.getNullButton());
 
+        playerColors = new Color[4][2];
+
+        //players.add(new Player("One", Color.BLACK, Color.WHITE));
+        //players.add(new Player("Two", Color.WHITE, Color.BLACK));
+        //players.add(new Player("Three", Color.BLUE, Color.RED));
+        //players.add(new Player("Four", Color.MAGENTA, Color.YELLOW));
+
+        playerNames = new String[]{"One", "Two", "Three", "Four"};
+        playerColors[0] = new Color[]{Color.BLACK, Color.WHITE};
+        playerColors[1] = new Color[]{Color.WHITE, Color.BLACK};
+        playerColors[2] = new Color[]{Color.BLUE, Color.RED};
+        playerColors[3] = new Color[]{Color.MAGENTA, Color.YELLOW};
+
         for(int i = 0; i < 4; i++)
         {
-            playerControllers[i] = new LocalPlayerController();
+            playerControllers[i] = new LocalPlayerController(playerNames[i], playerColors[i][0], playerColors[i][1]);
         }
 
         RadialButtonGroup playerCountSelectors = new RadialButtonGroup(new Point(),
@@ -54,8 +70,8 @@ public class SetupUberstate extends Uberstate
         addCenterOverlay(makePlayerAgentSelectorOverlay());
 
         Button startGameButton = new Button(new Point(),
-                ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, "START", new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "START", new Point(8, 18)),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, "START"),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "START"),
                 panel::setGameUberstate);
 
         addCenterOverlay(startGameButton);
@@ -66,9 +82,9 @@ public class SetupUberstate extends Uberstate
     private RadialButton makePlayerCountSelector(Point point, int number)
     {
         return new RadialButton(point,
-                ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, "" + number, new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "" + number, new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "" + number, new Point(8, 18)),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, "" + number),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "" + number),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "" + number),
                 () -> { playerCount = number; });
     }
 
@@ -106,22 +122,26 @@ public class SetupUberstate extends Uberstate
     {
 
         RadialButton localButton = new RadialButton(new Point(0, 0),
-                ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, "Local", new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "Local", new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "Local", new Point(8, 18)),
-                () -> {playerControllers[index] = new LocalPlayerController();});
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, "Local"),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "Local"),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "Local"),
+                () -> {playerControllers[index] = new LocalPlayerController(playerNames[index], playerColors[index][0], playerColors[index][1]);});
 
         RadialButton remoteButton = new RadialButton(new Point(96, 0),
-                ImageFactory.makeLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, "Agent", new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "Agent", new Point(8, 18)),
-                ImageFactory.makeLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "Agent", new Point(8, 18)),
-                () -> {playerControllers[index] = new AgentPlayerController();});
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.WHITE, Color.GRAY, Color.BLACK, "Agent"),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "Agent"),
+                ImageFactory.makeCenterLabeledRect(64, 32, Color.GRAY, Color.GRAY, Color.BLACK, "Agent"),
+                () -> {playerControllers[index] = new AgentPlayerController(playerNames[index], playerColors[index][0], playerColors[index][1]);});
+
+        localButton.press();
 
         return new RadialButtonGroup(new Point(0, y), localButton, remoteButton);
     }
 
     public GameUberstate makeGame()
     {
-        return new GameUberstate(new Point(0, 0), panel.getSize(), panel.getCamera(), panel::repaint, playerControllers);
+        return new GameUberstate(new Point(0, 0), panel.getSize(), panel.getCamera(),
+                panel::repaint, panel::setGameUberstate, panel::reset,
+                Arrays.copyOf(playerControllers, playerCount));
     }
 }

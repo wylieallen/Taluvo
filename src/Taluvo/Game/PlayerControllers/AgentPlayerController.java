@@ -4,9 +4,15 @@ import Taluvo.Game.GameModel.Game;
 import Taluvo.Game.GameUberstate;
 
 import javax.swing.*;
+import java.awt.*;
 
-public class AgentPlayerController implements PlayerController
+public class AgentPlayerController extends AbstractPlayerController
 {
+
+    public AgentPlayerController(String name, Color mainColor, Color altColor)
+    {
+        super(name, mainColor, altColor);
+    }
 
     public void activate(GameUberstate uberstate)
     {
@@ -39,7 +45,7 @@ public class AgentPlayerController implements PlayerController
         worker.execute();
     }
 
-    public void deactivate()
+    public void deactivate(GameUberstate uberstate)
     {
 
     }

@@ -10,6 +10,7 @@ import java.awt.Point;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Uberstate implements Displayable, Clickable
 {
@@ -33,7 +34,7 @@ public class Uberstate implements Displayable, Clickable
         this.size = size;
 
         underlays = new HashSet<>();
-        overlays = new HashSet<>();
+        overlays = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
         // Collections of intermediate displayables are stored in a LinkedHashSet to preserve insertion order
         displayables = new LinkedHashSet<>();

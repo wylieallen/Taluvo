@@ -22,7 +22,12 @@ public class Player
     private int temples = 3;
     private int towers = 2;
 
-    Player(String name, Color color1, Color color2)
+    private int score = 0;
+
+    private boolean winner = false;
+    private boolean loser = false;
+
+    public Player(String name, Color color1, Color color2)
     {
         this.name = name;
         this.color1 = color1;
@@ -50,12 +55,24 @@ public class Player
         return (villagers + temples == 0 || villagers + towers == 0 || temples + towers == 0);
     }
 
+    public void declareWinner() {winner = true;}
+    public boolean isWinner() {return winner;}
+    public void declareLoser() {loser = true;}
+    public boolean isLoser() {return loser;}
+
     public int getBuildingCount(Hex.Building building) { return buildingAccessors.get(building).execute(); }
-    public void decrementBuilding(Hex.Building building) { buildingDecrementers.get(building).execute(); }
+
+    public void decrementBuilding(Hex.Building building)
+    {
+        buildingDecrementers.get(building).execute();
+        score += building.points;
+    }
 
     public int getVillagers() { return villagers; }
     public int getTemples() { return temples; }
     public int getTowers() { return towers; }
+
+    public int getScore() { return score; }
 
     public Color getColor1() { return color1; }
     public Color getColor2() { return color2; }

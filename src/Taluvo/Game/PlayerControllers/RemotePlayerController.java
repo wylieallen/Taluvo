@@ -2,14 +2,21 @@ package Taluvo.Game.PlayerControllers;
 
 import Taluvo.Game.GameUberstate;
 
-public class RemotePlayerController implements PlayerController
+import java.awt.*;
+
+public class RemotePlayerController extends AbstractPlayerController
 {
+    public RemotePlayerController(String name, Color mainColor, Color altColor)
+    {
+        super(name, mainColor, altColor);
+    }
+
     public void activate(GameUberstate uberstate)
     {
 
     }
 
-    public void deactivate()
+    public void deactivate(GameUberstate uberstate)
     {
 
     }

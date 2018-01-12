@@ -1,10 +1,11 @@
 package Taluvo.Game.PlayerControllers;
 
-import Taluvo.Game.GameModel.Game;
+import Taluvo.Game.GameModel.Player;
 import Taluvo.Game.GameUberstate;
 
 public interface PlayerController
 {
     void activate(GameUberstate gameUberstate);
-    void deactivate();
+    void deactivate(GameUberstate gameUberstate);
+    Player makeNewPlayer();
 }

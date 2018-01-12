@@ -185,7 +185,7 @@ public class Board
     public List<Hex> getNewHexes()
     {
         List<Hex> retHexes = newHexes;
-        newHexes = new ArrayList<>();
+        newHexes = new CopyOnWriteArrayList<>();
         return retHexes;
     }
 

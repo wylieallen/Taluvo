@@ -32,14 +32,14 @@ public class StringDisplayable implements Displayable
 
     public Dimension getSize()
     {
-        int maxWidth = 0, heightMultiplier = 0;
+        int maxWidth = 0, lineCount = 0;
         for(String line : stringGenerator.execute().split("\n"))
         {
-            heightMultiplier++;
+            lineCount++;
             int lineWidth = fontMetrics.stringWidth(line);
             if(lineWidth > maxWidth) maxWidth = lineWidth;
         }
-        return new Dimension(maxWidth, fontMetrics.getHeight() * heightMultiplier);
+        return new Dimension(maxWidth, fontMetrics.getHeight() * lineCount);
     }
 
     public void drawAt(Graphics2D g2d, Point drawPt)

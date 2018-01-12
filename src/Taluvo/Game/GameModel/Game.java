@@ -12,13 +12,11 @@ public class Game
 
     private EndCondition endCondition;
 
+    private List<Player> players;
     private Player activePlayer;
-
     private Iterator<Player> playerIterator;
 
-    private List<Player> players;
-
-    public Game()
+    public Game(Player... players)
     {
         board = new Board();
         deck = new Deck();
@@ -26,14 +24,9 @@ public class Game
 
         endCondition = EndCondition.ACTIVE;
 
-        players = new ArrayList<>();
+        this.players = new ArrayList<>(Arrays.asList(players));
 
-        players.add(new Player("One", Color.BLACK, Color.WHITE));
-        players.add(new Player("Two", Color.WHITE, Color.BLACK));
-        players.add(new Player("Three", Color.BLUE, Color.RED));
-        players.add(new Player("Four", Color.MAGENTA, Color.YELLOW));
-
-        playerIterator = players.iterator();
+        playerIterator = this.players.iterator();
 
         activePlayer = playerIterator.next();
     }
@@ -50,11 +43,12 @@ public class Game
         endTurn();
     }
 
-    public void endTurn()
+    private void endTurn()
     {
         // Check for endgame
         if(activePlayer.declaresVictory())
         {
+            activePlayer.declareWinner();
             endCondition = EndCondition.NO_BUILDINGS;
             return;
         }
@@ -62,12 +56,46 @@ public class Game
         if(deck.getTileCount() >= 48)
         {
             endCondition = EndCondition.NO_TILES;
-            return;
+
+            // Sort players by score:
+            players.sort(Comparator.comparingInt(Player::getScore));
+
+            Player leader = players.get(players.size() - 1);
+
+            leader.declareWinner();
+
+            int highScore = leader.getScore();
+
+            for(int i = players.size() - 2; i >= 0; i--)
+            {
+                Player player = players.get(i);
+                if(player.getScore() == highScore)
+                {
+                    player.declareWinner();
+                }
+                else
+                {
+                    return;
+                }
+            }
         }
 
 
         // Toggle player
-        //activePlayer = (activePlayer == player1 ? player2 : player1);
+
+        if(!playerIterator.hasNext())
+        {
+            playerIterator = players.iterator();
+        }
+
+        activePlayer = playerIterator.next();
+    }
+
+    private void forfeit()
+    {
+        activePlayer.declareLoser();
+
+        playerIterator.remove();
 
         if(!playerIterator.hasNext())
         {
@@ -76,14 +104,11 @@ public class Game
 
         activePlayer = playerIterator.next();
 
-        // if active player has no legal moves, endCondition = EndCondition.NO_MOVES;
-    }
-
-    public void forfeit()
-    {
-        playerIterator.remove();
-        activePlayer = playerIterator.next();
-        //endCondition = EndCondition.NO_MOVES;
+        if(players.size() <= 1)
+        {
+            endCondition = EndCondition.NO_OPPONENTS;
+            activePlayer.declareWinner();
+        }
     }
 
     public boolean tilePlacementIsLegal(TilePlacementAction action) { return rules.tilePlacementIsLegal(action.getTarget().getOrigin(), action.getTile()); }
@@ -102,7 +127,6 @@ public class Game
     public Deck getDeck() {return deck;}
 
     public Player getActivePlayer() { return activePlayer; }
-    public Player getPlayer(int index) { return players.get(index); }
 
     public EndCondition getEndCondition() { return endCondition; }
 
@@ -381,6 +405,6 @@ public class Game
 
     public enum EndCondition
     {
-        ACTIVE, NO_BUILDINGS, NO_TILES, NO_MOVES;
+        ACTIVE, NO_BUILDINGS, NO_TILES, NO_OPPONENTS;
     }
 }

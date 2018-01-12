@@ -26,8 +26,8 @@ public class Button extends SimpleDisplayable implements Clickable
     public static Button makeLabeledButton(Point origin, Dimension size, String label, AbstractFunction pressFunction)
     {
         return new Button(origin,
-                ImageFactory.makeLabeledRect(size.width, size.height, Color.WHITE, Color.GRAY, Color.BLACK, label, new Point(6, 18)),
-                ImageFactory.makeLabeledRect(size.width, size.height, Color.RED, Color.GRAY, Color.BLACK, label, new Point(6, 18)),
+                ImageFactory.makeCenterLabeledRect(size.width, size.height, Color.WHITE, Color.GRAY, Color.BLACK, label),
+                ImageFactory.makeCenterLabeledRect(size.width, size.height, Color.RED, Color.GRAY, Color.BLACK, label),
                 pressFunction);
     }
 

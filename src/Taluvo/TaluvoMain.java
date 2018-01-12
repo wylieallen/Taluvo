@@ -30,23 +30,9 @@ public class TaluvoMain
 
         frame.getContentPane().add(panel, BorderLayout.CENTER);
 
-        JMenu fileMenu = new JMenu("File");
-
-        JMenuItem exit = new JMenuItem("Exit");
-        exit.addActionListener(event -> System.exit(0));
-
-        JMenuItem reset = new JMenuItem("Reset");
-        reset.addActionListener(event -> panel.reset());
-
-        fileMenu.add(reset);
-        fileMenu.add(exit);
-        JMenuBar menuBar = new JMenuBar();
-        menuBar.add(fileMenu);
-        frame.setJMenuBar(menuBar);
-
         frame.addComponentListener(new ComponentListener()
         {
-            public void componentResized(ComponentEvent evt)
+            public void componentResized(ComponentEvent e)
             {
                 panel.changeSize();
             }
