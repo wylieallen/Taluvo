@@ -292,6 +292,7 @@ public class GameUberstate extends Uberstate
         else
         {
             super.addLeftOverlay(postgameButtons);
+            super.overlayManager.resetLeftOverlays();
         }
     }
 

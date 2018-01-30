@@ -37,11 +37,6 @@ public class SetupUberstate extends Uberstate
 
         playerColors = new Color[4][2];
 
-        //players.add(new Player("One", Color.BLACK, Color.WHITE));
-        //players.add(new Player("Two", Color.WHITE, Color.BLACK));
-        //players.add(new Player("Three", Color.BLUE, Color.RED));
-        //players.add(new Player("Four", Color.MAGENTA, Color.YELLOW));
-
         playerNames = new String[]{"One", "Two", "Three", "Four"};
         playerColors[0] = new Color[]{Color.BLACK, Color.WHITE};
         playerColors[1] = new Color[]{Color.WHITE, Color.BLACK};

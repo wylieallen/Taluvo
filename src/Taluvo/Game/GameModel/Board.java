@@ -109,6 +109,7 @@ public class Board
         recalculateSettlements();
     }
 
+    // Warning: expandBoard isn't particularly efficient, don't input large numbers for depth
     private void expandBoard(Point point, int depth)
     {
         for(Point offset : Hex.neighborOffsets)
@@ -131,7 +132,10 @@ public class Board
     private void emplaceHex(Hex hex)
     {
         hexMap.put(hex.getOrigin(), hex);
-        newHexes.add(hex);
+        synchronized(newHexes)
+        {
+            newHexes.add(hex);
+        }
     }
 
     public Collection<Hex> getHexes()
@@ -184,9 +188,12 @@ public class Board
 
     public List<Hex> getNewHexes()
     {
-        List<Hex> retHexes = newHexes;
-        newHexes = new CopyOnWriteArrayList<>();
-        return retHexes;
+        synchronized(newHexes)
+        {
+            List<Hex> retHexes = newHexes;
+            newHexes = new CopyOnWriteArrayList<>();
+            return retHexes;
+        }
     }
 
     public Settlement.Expansion getExpansion(Settlement settlement, Hex.Terrain terrain)

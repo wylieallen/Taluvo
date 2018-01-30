@@ -1,11 +1,10 @@
 package Taluvo.GUI;
 
-import com.sun.corba.se.impl.orbutil.graph.Graph;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 
 public class InterfacePanel extends JPanel
 {
